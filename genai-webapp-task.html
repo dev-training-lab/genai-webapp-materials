@@ -1,0 +1,1213 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>生成AI活用 Webアプリ開発タスク</title>
+<style>
+  :root {
+    --pink: #FF3399;
+    --pink-dark: #C8006A;
+    --pink-tint: #FFF0F7;
+    --pink-line: #FFC2E0;
+    --ink: #2B2B33;
+    --ink-sub: #5F6070;
+    --line: #E6E6EC;
+    --bg: #FAFAFC;
+    --card: #FFFFFF;
+    --code-bg: #2A2433;
+    --code-ink: #F5EEF8;
+    --ok: #1F9D6B;
+    --warn: #C77700;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+  body {
+    margin: 0;
+    font-family: "Meiryo UI", Meiryo, "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.75;
+    font-size: 15px;
+  }
+
+  /* ---------- header ---------- */
+  .hero {
+    background: var(--pink);
+    color: #fff;
+    padding: 40px 16px 32px;
+  }
+  .hero-inner { max-width: 980px; margin: 0 auto; }
+  .hero .label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: .1em;
+    border: 1.5px solid rgba(255,255,255,.8);
+    border-radius: 999px;
+    padding: 2px 12px;
+    margin-bottom: 12px;
+  }
+  .hero h1 { margin: 0 0 8px; font-size: 30px; line-height: 1.35; }
+  .hero p.lead { margin: 0; font-size: 16px; opacity: .95; }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .meta div {
+    background: rgba(255,255,255,.16);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    min-width: 150px;
+  }
+  .meta b { display: block; font-size: 15px; }
+
+  /* ---------- nav ---------- */
+  nav.toc {
+    position: sticky; top: 0; z-index: 10;
+    background: #fff;
+    border-bottom: 3px solid var(--pink);
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  }
+  nav.toc ul {
+    max-width: 980px; margin: 0 auto; padding: 0 8px;
+    list-style: none; display: flex; overflow-x: auto; white-space: nowrap;
+  }
+  nav.toc a {
+    display: block; padding: 12px 12px;
+    color: var(--ink-sub); text-decoration: none; font-size: 13px; font-weight: bold;
+  }
+  nav.toc a:hover { color: var(--pink-dark); }
+
+  /* ---------- layout ---------- */
+  main { max-width: 980px; margin: 0 auto; padding: 8px 16px 64px; }
+  section { margin-top: 48px; }
+  h2 {
+    font-size: 22px; margin: 0 0 16px;
+    padding: 4px 0 4px 14px;
+    border-left: 6px solid var(--pink);
+  }
+  h2 small { font-size: 13px; color: var(--ink-sub); font-weight: normal; margin-left: 8px; }
+  h3 { font-size: 17px; margin: 24px 0 8px; color: var(--pink-dark); }
+  p { margin: 8px 0; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .note {
+    background: var(--pink-tint);
+    border: 1px solid var(--pink-line);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  .note.warn { background: #FFF7E8; border-color: #F3D49B; }
+  .note strong { color: var(--pink-dark); }
+  .note.warn strong { color: var(--warn); }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  ul.dots { padding-left: 1.3em; margin: 6px 0; }
+  ul.dots li { margin: 3px 0; }
+  .tag {
+    display: inline-block; font-size: 12px; font-weight: bold;
+    border-radius: 4px; padding: 1px 8px; margin-right: 4px;
+    background: var(--pink-tint); color: var(--pink-dark); border: 1px solid var(--pink-line);
+  }
+  .tag.gray { background: #F1F1F5; color: var(--ink-sub); border-color: var(--line); }
+
+  /* ---------- goal ---------- */
+  .goals { counter-reset: g; list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .goals li {
+    counter-increment: g; position: relative;
+    background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 16px 12px 56px;
+  }
+  .goals li::before {
+    content: counter(g);
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--pink); color: #fff; font-weight: bold;
+    display: grid; place-items: center;
+  }
+
+  /* ---------- AI tool flow ---------- */
+  .flow { display: grid; gap: 12px; }
+  .flow-row {
+    display: grid; grid-template-columns: 1fr 40px 1fr; align-items: center; gap: 8px;
+  }
+  .q {
+    background: #fff; border: 2px solid var(--pink); border-radius: 10px;
+    padding: 12px 14px; font-weight: bold;
+  }
+  .arrow { text-align: center; color: var(--pink); font-weight: bold; font-size: 13px; }
+  .arrow::after { content: "→"; display: block; font-size: 22px; line-height: 1; }
+  .ans {
+    background: var(--pink); color: #fff; border-radius: 10px; padding: 12px 14px;
+  }
+  .ans b { font-size: 17px; }
+  .ans span { display: block; font-size: 13px; opacity: .95; }
+  .ans.alt { background: #fff; color: var(--ink); border: 2px dashed var(--pink); }
+  .ans.alt b { color: var(--pink-dark); }
+
+  /* ---------- tables ---------- */
+  table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--pink-tint); color: var(--pink-dark); white-space: nowrap; }
+  .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--line); }
+  .table-wrap table { border: none; }
+  .table-wrap tr:first-child th { border-top: none; }
+  .table-wrap tr th:first-child, .table-wrap tr td:first-child { border-left: none; }
+  .table-wrap tr th:last-child, .table-wrap tr td:last-child { border-right: none; }
+  .table-wrap tr:last-child td { border-bottom: none; }
+
+  /* ---------- architecture ---------- */
+  .arch { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .arch svg { width: 100%; height: auto; display: block; }
+
+  /* ---------- topics ---------- */
+  .topics { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+  .topic {
+    background: #fff; border: 2px solid var(--line); border-radius: 12px;
+    padding: 18px 18px 14px; display: flex; flex-direction: column;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .topic.selected { border-color: var(--pink); box-shadow: 0 0 0 4px var(--pink-tint); }
+  .topic-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .topic h3 { margin: 0; color: var(--ink); font-size: 17px; }
+  .topic .no { color: var(--pink); font-weight: bold; font-size: 13px; }
+  .stars { color: var(--pink); letter-spacing: 2px; white-space: nowrap; font-size: 14px; }
+  .stars .off { color: #DDD; }
+  .topic .summary { color: var(--ink-sub); font-size: 13.5px; margin: 6px 0 10px; }
+  .topic dl { margin: 0; font-size: 13.5px; }
+  .topic dt { font-weight: bold; color: var(--pink-dark); margin-top: 8px; }
+  .topic dd { margin: 2px 0 0; }
+  .topic dd ul { margin: 0; padding-left: 1.2em; }
+  .topic .spacer { flex: 1; }
+  .pick {
+    margin-top: 14px; width: 100%;
+    font: inherit; font-weight: bold; font-size: 14px;
+    border: 2px solid var(--pink); color: var(--pink-dark); background: #fff;
+    border-radius: 8px; padding: 8px; cursor: pointer;
+  }
+  .pick:hover { background: var(--pink-tint); }
+  .topic.selected .pick { background: var(--pink); color: #fff; }
+  .recommend {
+    display: inline-block; background: var(--pink); color: #fff; font-size: 11px; font-weight: bold;
+    border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px;
+  }
+
+  /* ---------- code ---------- */
+  .code {
+    position: relative; background: var(--code-bg); color: var(--code-ink);
+    border-radius: 10px; margin: 10px 0; overflow: hidden;
+  }
+  .code .code-title {
+    font-size: 12px; color: #D9C6E6; padding: 8px 14px; border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .code pre {
+    margin: 0; padding: 14px; overflow-x: auto;
+    font-family: Consolas, "SFMono-Regular", Menlo, monospace; font-size: 13px; line-height: 1.6;
+  }
+  .copy {
+    font: inherit; font-size: 12px; color: #fff; background: rgba(255,51,153,.85);
+    border: none; border-radius: 6px; padding: 3px 10px; cursor: pointer;
+  }
+  .copy:hover { background: var(--pink); }
+  code.inline {
+    font-family: Consolas, Menlo, monospace; font-size: 13px;
+    background: #F1F1F5; border-radius: 4px; padding: 1px 6px;
+  }
+
+  /* ---------- schedule / checklist ---------- */
+  .progress-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .progress { flex: 1; height: 12px; background: #EEE; border-radius: 999px; overflow: hidden; }
+  .progress > div { height: 100%; width: 0; background: var(--pink); transition: width .25s; }
+  .progress-label { font-weight: bold; color: var(--pink-dark); min-width: 72px; text-align: right; }
+  .weeks { display: grid; gap: 14px; }
+  .week { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .week-head {
+    display: flex; gap: 12px; align-items: center;
+    padding: 10px 16px; background: var(--pink-tint); border-bottom: 1px solid var(--pink-line);
+  }
+  .week-head .wk {
+    background: var(--pink); color: #fff; font-weight: bold; font-size: 13px;
+    border-radius: 6px; padding: 2px 10px; white-space: nowrap;
+  }
+  .week-head h3 { margin: 0; font-size: 16px; color: var(--ink); }
+  .week ul { list-style: none; margin: 0; padding: 8px 16px 12px; }
+  .week li { padding: 4px 0; }
+  .week label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .week input[type=checkbox] { accent-color: var(--pink); width: 18px; height: 18px; margin-top: 4px; flex: none; }
+  .week input:checked + span { color: #9A9AA6; text-decoration: line-through; }
+
+  /* ---------- requirements ---------- */
+  .req h3 { display: flex; align-items: center; gap: 8px; margin-top: 0; }
+  .fork-steps { padding-left: 1.5em; margin: 6px 0 12px; }
+  .fork-steps li { margin: 4px 0; }
+  .fork-steps a, footer a { color: var(--pink-dark); }
+  .req ul { margin: 0; padding-left: 1.3em; }
+  .req li { margin: 4px 0; }
+
+  /* ---------- prompts ---------- */
+  details.prompt {
+    background: #fff; border: 1px solid var(--line); border-radius: 10px; margin: 10px 0;
+  }
+  details.prompt summary {
+    cursor: pointer; padding: 12px 16px; font-weight: bold; list-style: none;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  details.prompt summary::-webkit-details-marker { display: none; }
+  details.prompt summary::after { content: "＋"; color: var(--pink); font-size: 18px; }
+  details.prompt[open] summary::after { content: "－"; }
+  details.prompt .body { padding: 0 16px 14px; }
+
+  footer {
+    text-align: center; color: var(--ink-sub); font-size: 12px;
+    padding: 24px 16px 40px; border-top: 1px solid var(--line);
+  }
+  footer .bar { height: 6px; background: var(--pink); margin-bottom: 24px; }
+
+  /* ---------- slack modal ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 30;
+    background: rgba(30,20,35,.5);
+    display: none; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 14px; width: 100%; max-width: 640px;
+    max-height: calc(100vh - 32px); display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,.25);
+  }
+  .modal-head {
+    background: var(--pink); color: #fff;
+    display: flex; justify-content: space-between; align-items: center; padding: 14px 18px;
+  }
+  .modal-head h2 { border: none; padding: 0; margin: 0; font-size: 17px; color: #fff; }
+  .modal-close {
+    font: inherit; font-size: 22px; line-height: 1; color: #fff; background: none;
+    border: none; cursor: pointer; padding: 0 4px;
+  }
+  .modal-body { padding: 16px 18px; overflow-y: auto; }
+  .modal-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .modal-tabs button {
+    font: inherit; font-size: 13px; font-weight: bold; cursor: pointer;
+    border: 2px solid var(--pink); background: #fff; color: var(--pink-dark);
+    border-radius: 999px; padding: 4px 14px;
+  }
+  .modal-tabs button[aria-selected="true"] { background: var(--pink); color: #fff; }
+  .modal-field { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13px; }
+  .modal-field select { font: inherit; font-size: 13px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; }
+  .modal-hint { font-size: 12.5px; color: var(--warn); margin: 0 0 8px; }
+  .modal textarea {
+    width: 100%; height: 300px; max-height: 50vh; resize: vertical;
+    font-family: "Meiryo UI", Meiryo, sans-serif; font-size: 13.5px; line-height: 1.7;
+    border: 1px solid var(--line); border-radius: 8px; padding: 12px;
+  }
+  .modal textarea:focus { outline: 2px solid var(--pink-line); border-color: var(--pink); }
+  .modal-foot {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 12px 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-sub);
+  }
+  .modal-copy {
+    font: inherit; font-weight: bold; font-size: 14px; cursor: pointer; white-space: nowrap;
+    background: var(--pink); color: #fff; border: none; border-radius: 8px; padding: 8px 18px;
+  }
+  .modal-copy:hover { background: var(--pink-dark); }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 23px; }
+    .flow-row { grid-template-columns: 1fr; }
+    .arrow::after { content: "↓"; }
+    .card { padding: 16px; }
+  }
+  @media print {
+    nav.toc, .pick, .copy, .modal-backdrop { display: none !important; }
+    body { background: #fff; font-size: 12px; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    section { break-inside: avoid-page; }
+    details.prompt { break-inside: avoid; }
+    details.prompt .body { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="label">TRAINING TASK</span>
+    <h1>生成AIを活用した<br>Webアプリケーション開発</h1>
+    <p class="lead">AIコーディングツールを相棒にして、フロントエンド・バックエンド・DBまで一通り動くWebアプリを自分の手で作りきる。</p>
+    <div class="meta">
+      <div>期間の目安<b>4週間</b></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="目次">
+  <ul>
+    <li><a href="#goal">ゴール</a></li>
+    <li><a href="#ai">AIツール</a></li>
+    <li><a href="#stack">技術スタック</a></li>
+    <li><a href="#topics">題材候補</a></li>
+    <li><a href="#req">要件</a></li>
+    <li><a href="#schedule">進め方</a></li>
+    <li><a href="#tips">AI活用のコツ</a></li>
+    <li><a href="#setup">環境構築</a></li>
+    <li><a href="#deliver">成果物・評価</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <!-- ============ ゴール ============ -->
+  <section id="goal">
+    <h2>このタスクのゴール</h2>
+    <ol class="goals">
+      <li><b>フロント〜API〜DBが一気通貫で動く</b>Webアプリを、ローカル環境で起動できる状態まで作る</li>
+      <li>生成AIに<b>「書かせる」だけでなく「相談する・レビューさせる・調べさせる」</b>使い方を身につける</li>
+      <li>AIが書いたコードも含めて、<b>自分のコードとして説明できる</b>状態にする</li>
+      <li>要件整理 → 設計 → 実装 → テスト → ドキュメントという<b>開発の一連の流れ</b>を体験する</li>
+    </ol>
+    <p class="note" style="margin-top:16px"><strong>完成度よりも「理解度」を重視します。</strong>機能を盛るより、少ない機能をきちんと動かし、なぜそう作ったかを説明できることを優先してください。</p>
+  </section>
+
+  <!-- ============ AIツール ============ -->
+  <section id="ai">
+    <h2>使用するAIツール <small>契約状況で選ぶ</small></h2>
+    <p class="note" style="margin-bottom:16px"><strong>可能なら Claude か ChatGPT の有料プランを契約してください。</strong>Claude Pro / ChatGPT Plus はいずれも月額 $20 程度です（料金は変わることがあるので公式で確認）。契約が難しい場合は GitHub Copilot Free でも進められます。</p>
+    <div class="flow">
+      <div class="flow-row">
+        <div class="q">Claude（Pro 以上）を個人で契約している？</div>
+        <div class="arrow">はい</div>
+        <div class="ans"><b>Claude Code</b><span>Claude デスクトップアプリの Code タブ、またはターミナルから利用（VS Code 拡張は使わない）</span></div>
+      </div>
+      <div class="flow-row">
+        <div class="q">ChatGPT（Plus 以上）を個人で契約している？</div>
+        <div class="arrow">はい</div>
+        <div class="ans"><b>Codex</b><span>Codex アプリから利用（ChatGPT デスクトップアプリをインストールしてサインイン）</span></div>
+      </div>
+      <div class="flow-row">
+        <div class="q">どちらも契約していない</div>
+        <div class="arrow">なら</div>
+        <div class="ans alt"><b>GitHub Copilot Free</b><span>GitHub アカウントで無料登録 → VS Code の Copilot 拡張から利用</span></div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="note"><strong>両方契約している場合</strong>はどちらを使っても構いません。途中で切り替えてもOKですが、どのツールを何に使ったかは AI活用ログ に残してください。</div>
+      <div class="note warn"><strong>Copilot Free の注意：</strong><b>コード補完は月 2,000 回まで</b>、チャットやエージェントも<b>月ごとの AI クレジットの範囲内</b>でしか使えません（最新の上限は GitHub 公式で確認）。「まず自分で考えてから聞く」を徹底し、回数を計画的に使いましょう。</div>
+    </div>
+    <div class="note warn" style="margin-top:12px">
+      <strong>情報の取り扱い：</strong>このタスクは新規の学習用リポジトリなので AI に入力して問題ありません。ただし<b>業務案件のソースコード・顧客情報・社内の機密情報は入力しない</b>こと。会社の生成AI利用ガイドラインがある場合はそちらに従ってください。
+    </div>
+  </section>
+
+  <!-- ============ 技術スタック ============ -->
+  <section id="stack">
+    <h2>技術スタック</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>レイヤー</th><th>技術</th><th>補足</th></tr>
+        <tr><td>フロントエンド</td><td><b>Next.js</b>（App Router）＋ <b>React</b> ＋ TypeScript</td><td>Node.js は LTS 版。スタイリングは自由（CSS Modules / Tailwind など）</td></tr>
+        <tr><td>バックエンド</td><td><b>Java 25</b>（LTS）＋ <b>Spring Boot 4.1</b></td><td>Spring Web MVC / Validation / Flyway。ビルドは Gradle 推奨（Maven でも可）</td></tr>
+        <tr><td>DB アクセス</td><td><b>MyBatis</b></td><td>Mapper インターフェースと XML に SQL を自分で書く。Spring Data JPA は使わない</td></tr>
+        <tr><td>データベース</td><td><b>PostgreSQL</b>（Docker）</td><td><code class="inline">docker compose</code> で起動。テーブル定義は Flyway のマイグレーションで管理</td></tr>
+        <tr><td>API</td><td>REST（JSON）</td><td>フロント → バックエンドは HTTP で通信。余裕があれば OpenAPI（springdoc）で仕様書を出力</td></tr>
+        <tr><td>バージョン管理</td><td>Git / GitHub</td><td>1機能1ブランチ、Pull Request でレビュー</td></tr>
+      </table>
+    </div>
+
+    <h3>システム構成</h3>
+    <div class="arch">
+      <svg viewBox="0 0 900 230" role="img" aria-label="ブラウザ、Next.js、Spring Boot、PostgreSQL の構成図">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#FF3399"/>
+          </marker>
+        </defs>
+        <g font-family="Meiryo UI, Meiryo, sans-serif" text-anchor="middle">
+          <!-- browser -->
+          <rect x="10" y="60" width="170" height="100" rx="12" fill="#fff" stroke="#C9C9D3" stroke-width="2"/>
+          <text x="95" y="102" font-size="17" font-weight="bold" fill="#2B2B33">ブラウザ</text>
+          <text x="95" y="126" font-size="13" fill="#5F6070">利用者</text>
+          <!-- next -->
+          <rect x="240" y="60" width="190" height="100" rx="12" fill="#FFF0F7" stroke="#FF3399" stroke-width="2"/>
+          <text x="335" y="98" font-size="17" font-weight="bold" fill="#2B2B33">Next.js / React</text>
+          <text x="335" y="122" font-size="13" fill="#5F6070">画面・入力チェック</text>
+          <text x="335" y="143" font-size="12" fill="#C8006A">localhost:3000</text>
+          <!-- spring -->
+          <rect x="490" y="60" width="190" height="100" rx="12" fill="#FFF0F7" stroke="#FF3399" stroke-width="2"/>
+          <text x="585" y="98" font-size="17" font-weight="bold" fill="#2B2B33">Spring Boot</text>
+          <text x="585" y="122" font-size="13" fill="#5F6070">REST API・業務ロジック</text>
+          <text x="585" y="143" font-size="12" fill="#C8006A">localhost:8080</text>
+          <!-- docker -->
+          <rect x="730" y="30" width="160" height="160" rx="12" fill="none" stroke="#2496ED" stroke-width="2" stroke-dasharray="6 5"/>
+          <text x="810" y="52" font-size="12" font-weight="bold" fill="#2496ED">Docker</text>
+          <rect x="745" y="68" width="130" height="92" rx="12" fill="#FF3399"/>
+          <text x="810" y="106" font-size="16" font-weight="bold" fill="#fff">PostgreSQL</text>
+          <text x="810" y="130" font-size="12" fill="#fff">localhost:5432</text>
+          <!-- arrows -->
+          <line x1="182" y1="110" x2="236" y2="110" stroke="#FF3399" stroke-width="2.5" marker-end="url(#ah)"/>
+          <line x1="432" y1="110" x2="486" y2="110" stroke="#FF3399" stroke-width="2.5" marker-end="url(#ah)"/>
+          <line x1="682" y1="114" x2="741" y2="114" stroke="#FF3399" stroke-width="2.5" marker-end="url(#ah)"/>
+          <text x="459" y="96" font-size="12" fill="#5F6070">HTTP</text>
+          <text x="459" y="184" font-size="12" fill="#5F6070">JSON (fetch)</text>
+          <text x="711" y="100" font-size="12" fill="#5F6070">JDBC</text>
+          <text x="696" y="184" font-size="12" fill="#5F6070">MyBatis</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ============ 題材候補 ============ -->
+  <section id="topics">
+    <h2>題材候補 <small>1つ選ぶと Slack 報告用の文章が表示されます</small></h2>
+    <p>難易度は<span class="stars">★<span class="off">★★</span></span>（入門）〜<span class="stars">★★★</span>（挑戦）。迷ったら <b>01 備品・書籍の貸出管理</b> がおすすめです。自分で考えた題材も歓迎（事前に相談してください）。</p>
+
+    <div class="topics" id="topicList">
+
+      <article class="topic" data-id="t1">
+        <div class="topic-head">
+          <div><div class="no">01</div><h3>備品・書籍の貸出管理<span class="recommend">おすすめ</span></h3></div>
+          <div class="stars">★★<span class="off">★</span></div>
+        </div>
+        <p class="summary">社内の本・PC周辺機器などの「誰が何を借りているか」を管理する。</p>
+        <dl>
+          <dt>基本機能</dt>
+          <dd><ul><li>備品の登録・一覧・検索</li><li>貸出／返却の登録</li><li>貸出中・返却期限切れの表示</li><li>備品ごとの貸出履歴</li></ul></dd>
+          <dt>発展</dt>
+          <dd>カテゴリ絞り込み、予約、ログインして「自分の貸出一覧」</dd>
+          <dt>学べること</dt>
+          <dd>1対多のテーブル設計、状態遷移（在庫あり⇔貸出中）、トランザクション</dd>
+        </dl>
+        <div class="spacer"></div>
+        <button class="pick" type="button">この題材にする</button>
+      </article>
+
+      <article class="topic" data-id="t2">
+        <div class="topic-head">
+          <div><div class="no">02</div><h3>個人タスク管理（カンバン）</h3></div>
+          <div class="stars">★<span class="off">★★</span></div>
+        </div>
+        <p class="summary">ToDo を「未着手 / 進行中 / 完了」のボードで管理する定番アプリ。</p>
+        <dl>
+          <dt>基本機能</dt>
+          <dd><ul><li>タスクの登録・編集・削除</li><li>ステータス変更</li><li>期限・優先度の設定と並び替え</li></ul></dd>
+          <dt>発展</dt>
+          <dd>ドラッグ＆ドロップ移動、ラベル、期限切れ強調</dd>
+          <dt>学べること</dt>
+          <dd>CRUD の基本形、enum の扱い、フロントの状態管理</dd>
+        </dl>
+        <div class="spacer"></div>
+        <button class="pick" type="button">この題材にする</button>
+      </article>
+
+      <article class="topic" data-id="t3">
+        <div class="topic-head">
+          <div><div class="no">03</div><h3>社内勉強会の参加登録</h3></div>
+          <div class="stars">★★<span class="off">★</span></div>
+        </div>
+        <p class="summary">勉強会・イベントを告知し、参加申込を受け付ける。</p>
+        <dl>
+          <dt>基本機能</dt>
+          <dd><ul><li>イベントの作成・一覧・詳細</li><li>参加申込／キャンセル</li><li>定員チェック（満員なら申込不可）</li></ul></dd>
+          <dt>発展</dt>
+          <dd>キャンセル待ち、開催後のアンケート、参加者CSV出力</dd>
+          <dt>学べること</dt>
+          <dd>多対多の中間テーブル、業務ルールのバリデーション、同時申込の扱い</dd>
+        </dl>
+        <div class="spacer"></div>
+        <button class="pick" type="button">この題材にする</button>
+      </article>
+
+      <article class="topic" data-id="t4">
+        <div class="topic-head">
+          <div><div class="no">04</div><h3>日報・週報管理</h3></div>
+          <div class="stars">★★<span class="off">★</span></div>
+        </div>
+        <p class="summary">日々の業務報告を書き、上長がコメントを返せるようにする。</p>
+        <dl>
+          <dt>基本機能</dt>
+          <dd><ul><li>日報の作成・編集・一覧（日付順）</li><li>キーワード・期間で検索</li><li>日報へのコメント</li></ul></dd>
+          <dt>発展</dt>
+          <dd>Markdown 入力、作業時間の集計グラフ、週報の自動まとめ</dd>
+          <dt>学べること</dt>
+          <dd>検索条件付きクエリ、ページング、日付の扱い</dd>
+        </dl>
+        <div class="spacer"></div>
+        <button class="pick" type="button">この題材にする</button>
+      </article>
+
+      <article class="topic" data-id="t5">
+        <div class="topic-head">
+          <div><div class="no">05</div><h3>会議室予約システム</h3></div>
+          <div class="stars">★★★</div>
+        </div>
+        <p class="summary">会議室の空き状況を見て、時間帯を指定して予約する。</p>
+        <dl>
+          <dt>基本機能</dt>
+          <dd><ul><li>会議室マスタの管理</li><li>日付ごとの予約状況表示（タイムテーブル）</li><li>予約登録・取消、<b>時間帯の重複チェック</b></li></ul></dd>
+          <dt>発展</dt>
+          <dd>週表示カレンダー、繰り返し予約、設備（モニター有無）での絞り込み</dd>
+          <dt>学べること</dt>
+          <dd>日時・タイムゾーン、重複判定ロジックとテスト、排他制御</dd>
+        </dl>
+        <div class="spacer"></div>
+        <button class="pick" type="button">この題材にする</button>
+      </article>
+
+      <article class="topic" data-id="t6">
+        <div class="topic-head">
+          <div><div class="no">06</div><h3>家計簿・経費メモ</h3></div>
+          <div class="stars">★<span class="off">★★</span></div>
+        </div>
+        <p class="summary">収入・支出を記録し、月ごと・カテゴリごとに集計する。</p>
+        <dl>
+          <dt>基本機能</dt>
+          <dd><ul><li>収支の登録・編集・削除</li><li>カテゴリ管理</li><li>月別・カテゴリ別の集計表示</li></ul></dd>
+          <dt>発展</dt>
+          <dd>グラフ表示、予算設定と超過アラート、CSV 取込</dd>
+          <dt>学べること</dt>
+          <dd>集計 SQL（GROUP BY）、金額の型（BigDecimal / numeric）</dd>
+        </dl>
+        <div class="spacer"></div>
+        <button class="pick" type="button">この題材にする</button>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ 要件 ============ -->
+  <section id="req">
+    <h2>共通要件</h2>
+    <div class="grid2 req">
+      <div class="card">
+        <h3><span class="tag">MUST</span>必須</h3>
+        <ul>
+          <li><code class="inline">docker compose up -d</code> で PostgreSQL が起動する</li>
+          <li>テーブルは <b>Flyway</b> のマイグレーションで作成する（手動 CREATE しない）</li>
+          <li>Spring Boot で REST API を実装（<b>2テーブル以上・関連あり</b>の CRUD）</li>
+          <li>DB アクセスは <b>MyBatis</b> で実装する（SQL は自分で読んで説明できること）</li>
+          <li>Next.js の画面から一覧・登録・更新・削除ができる</li>
+          <li>入力チェックをフロント・バックエンドの<b>両方</b>で行う</li>
+          <li>エラー時に画面で分かるメッセージを出す</li>
+          <li>バックエンドの主要ロジックに単体テストがある</li>
+          <li>README の手順だけで、他の人が起動できる</li>
+          <li>リポジトリ直下に <b>CLAUDE.md または AGENTS.md</b> があり、実際の構成と合っている</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="tag gray">WANT</span>余裕があれば</h3>
+        <ul>
+          <li>ログイン機能（Spring Security）</li>
+          <li>OpenAPI（springdoc-openapi）で API 仕様を自動生成</li>
+          <li>フロント・バックエンドも Docker 化して一括起動</li>
+          <li>GitHub Actions でテストを自動実行</li>
+          <li>Playwright などで E2E テスト</li>
+          <li>レスポンシブ対応・アクセシビリティ配慮</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 進め方 ============ -->
+  <section id="schedule">
+    <h2>進め方 <small>チェックは このブラウザに保存されます</small></h2>
+    <div class="progress-wrap">
+      <div class="progress"><div id="bar"></div></div>
+      <div class="progress-label" id="pct">0%</div>
+    </div>
+
+    <div class="weeks" id="checklist">
+      <div class="week">
+        <div class="week-head"><span class="wk">Week 1</span><h3>準備・要件定義・設計</h3></div>
+        <ul>
+          <li><label><input type="checkbox" data-k="w1a"><span>AIツールを決めてセットアップする</span></label></li>
+          <li><label><input type="checkbox" data-k="w1g"><span>雛形を fork し、本家へ進捗 Draft PR を作る</span></label></li>
+          <li><label><input type="checkbox" data-k="w1b"><span>開発環境を構築し、各サービスの雛形が起動することを確認</span></label></li>
+          <li><label><input type="checkbox" data-k="w1f"><span>使う AI ツールに合わせて <code class="inline">CLAUDE.md</code> か <code class="inline">AGENTS.md</code> を作成する</span></label></li>
+          <li><label><input type="checkbox" data-k="w1c"><span>題材を決め、AIと壁打ちしながら <code class="inline">docs/requirements.md</code> に機能一覧を書く</span></label></li>
+          <li><label><input type="checkbox" data-k="w1d"><span>画面のラフ（手書き写真でOK）と画面遷移を作る</span></label></li>
+          <li><label><input type="checkbox" data-k="w1e"><span>ER図・API一覧を作り、<b>レビューを受ける</b></span></label></li>
+        </ul>
+      </div>
+      <div class="week">
+        <div class="week-head"><span class="wk">Week 2</span><h3>DB・バックエンド実装</h3></div>
+        <ul>
+          <li><label><input type="checkbox" data-k="w2a"><span>Flyway のマイグレーション（<code class="inline">V1__init.sql</code>）を書く</span></label></li>
+          <li><label><input type="checkbox" data-k="w2b"><span>Entity / Mapper（インターフェース＋XML）/ Service / Controller を実装</span></label></li>
+          <li><label><input type="checkbox" data-k="w2f"><span>検索・集計の処理を動的 SQL（<code class="inline">&lt;where&gt;</code> / <code class="inline">&lt;if&gt;</code>）などで実装</span></label></li>
+          <li><label><input type="checkbox" data-k="w2c"><span>Bean Validation と例外ハンドリング（<code class="inline">@RestControllerAdvice</code>）</span></label></li>
+          <li><label><input type="checkbox" data-k="w2d"><span>Service 層の単体テストを書く</span></label></li>
+          <li><label><input type="checkbox" data-k="w2e"><span>curl / HTTPクライアントで全 API の動作確認</span></label></li>
+        </ul>
+      </div>
+      <div class="week">
+        <div class="week-head"><span class="wk">Week 3</span><h3>フロントエンド実装・結合</h3></div>
+        <ul>
+          <li><label><input type="checkbox" data-k="w3a"><span>一覧・詳細・登録・編集の各画面を作る</span></label></li>
+          <li><label><input type="checkbox" data-k="w3b"><span>API と接続（CORS 設定 or Next.js の rewrites）</span></label></li>
+          <li><label><input type="checkbox" data-k="w3c"><span>フォームの入力チェックとエラー表示</span></label></li>
+          <li><label><input type="checkbox" data-k="w3d"><span>中間レビューを受け、指摘を反映する</span></label></li>
+        </ul>
+      </div>
+      <div class="week">
+        <div class="week-head"><span class="wk">Week 4</span><h3>仕上げ・振り返り・デモ</h3></div>
+        <ul>
+          <li><label><input type="checkbox" data-k="w4a"><span>README を整備（概要・起動手順・画面キャプチャ）</span></label></li>
+          <li><label><input type="checkbox" data-k="w4b"><span>クリーンな状態から README どおりに起動できるか確認</span></label></li>
+          <li><label><input type="checkbox" data-k="w4c"><span>AI活用レポート（<code class="inline">docs/ai-log.md</code>）をまとめる</span></label></li>
+          <li><label><input type="checkbox" data-k="w4d"><span>最終デモ（10分）＋ 質疑応答</span></label></li>
+        </ul>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px">詰まったら <b>30分</b> 自分＋AIで粘って、解決しなければ相談してください。「何を試して、どうなったか」をセットで伝えると早く解決します。</p>
+  </section>
+
+  <!-- ============ AI活用のコツ ============ -->
+  <section id="tips">
+    <h2>生成AI活用のルールとコツ</h2>
+    <div class="grid3">
+      <div class="card">
+        <h3 style="margin-top:0">① 先に自分で考える</h3>
+        <p>設計方針やテーブル案を自分で書いてから、AIに「レビューして」「抜けはある？」と聞く。丸投げより学びが大きく、回答の質も上がります。</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">② 小さく頼む</h3>
+        <p>「アプリを全部作って」ではなく「このテーブルの検索用 Mapper を」のように1機能・1ファイル単位で依頼。差分を読める量に保ちます。</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">③ 説明できないものはコミットしない</h3>
+        <p>生成されたコードは1行ずつ読む。分からない箇所は「この行は何をしている？」とAIに質問してからコミット。</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">④ 公式ドキュメントで裏取り</h3>
+        <p>AIは古いバージョンの書き方を出すことがあります（例：Spring Boot 2系の<code class="inline">javax.*</code>、Spring Boot 3系までの<code class="inline">@MockBean</code>、Next.js の Pages Router）。怪しいと思ったら公式を確認。</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">⑤ エラーは全文＋期待値</h3>
+        <p>スタックトレースを全文貼り、「何をしたら」「何を期待して」「何が起きたか」を伝える。関連ファイルも一緒に見せる。</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">⑥ ログを残す</h3>
+        <p>うまくいったプロンプト・失敗したプロンプトを <code class="inline">docs/ai-log.md</code> にメモ。最終レポートの材料になります。</p>
+      </div>
+    </div>
+
+    <h3>プロンプト例</h3>
+    <details class="prompt">
+      <summary>要件の壁打ち</summary>
+      <div class="body">
+        <div class="code"><div class="code-title">prompt<button class="copy" type="button">コピー</button></div><pre>社内の備品・書籍の貸出管理Webアプリを作ります。
+技術は Next.js + Spring Boot + PostgreSQL です。
+新人研修の課題なので、4週間で作れる規模に収めたいです。
+
+以下は私が考えた機能一覧です。
+- 備品の登録・一覧・検索
+- 貸出・返却
+- 返却期限切れの表示
+
+1. 抜けている重要な機能や考慮点を挙げてください
+2. MUST / WANT に分類してください
+3. 実装の難所になりそうな箇所を教えてください
+まだコードは書かないでください。</pre></div>
+      </div>
+    </details>
+    <details class="prompt">
+      <summary>テーブル設計のレビュー</summary>
+      <div class="body">
+        <div class="code"><div class="code-title">prompt<button class="copy" type="button">コピー</button></div><pre>以下のテーブル設計をレビューしてください（PostgreSQL）。
+正規化、制約（NOT NULL / UNIQUE / 外部キー）、インデックス、
+命名の観点で問題点と改善案を、理由とともに挙げてください。
+
+（ここに自分で書いた CREATE TABLE 文 or ER図のテキストを貼る）</pre></div>
+      </div>
+    </details>
+    <details class="prompt">
+      <summary>実装の依頼（小さく）</summary>
+      <div class="body">
+        <div class="code"><div class="code-title">prompt<button class="copy" type="button">コピー</button></div><pre>Spring Boot 4 / Java 25 / MyBatis を使っています（JPA は使いません）。
+以下の Entity と Mapper を使って、貸出処理を行う Service メソッドを書いてください。
+
+条件:
+- 貸出中の備品は貸し出せない（業務例外を投げる）
+- 貸出と備品ステータス更新は同一トランザクション
+- 単体テスト（JUnit 5 + Mockito）も一緒に
+
+書いたあと、設計上の判断ポイントを箇条書きで説明してください。
+
+（ここに Entity と Mapper のコードを貼る）</pre></div>
+      </div>
+    </details>
+    <details class="prompt">
+      <summary>MyBatis の検索クエリ</summary>
+      <div class="body">
+        <div class="code"><div class="code-title">prompt<button class="copy" type="button">コピー</button></div><pre>Spring Boot 4 / Java 25 / MyBatis / PostgreSQL を使っています。
+備品一覧の検索を MyBatis の Mapper（インターフェース＋XML）で書いてください。
+
+条件:
+- キーワード（部分一致）とカテゴリで絞り込む。どちらも未指定なら全件
+- 動的 SQL は &lt;where&gt; と &lt;if&gt; を使う
+- 値は #{} でバインドし、${} は使わない
+
+書いたあと、#{} と ${} の違いと、この SQL で使うべきインデックスを説明してください。
+
+（ここにテーブル定義を貼る）</pre></div>
+      </div>
+    </details>
+    <details class="prompt">
+      <summary>エラー調査</summary>
+      <div class="body">
+        <div class="code"><div class="code-title">prompt<button class="copy" type="button">コピー</button></div><pre>Next.js（localhost:3000）から Spring Boot（localhost:8080）の
+GET /api/items を fetch すると、ブラウザのコンソールに以下のエラーが出ます。
+
+【やったこと】
+【期待する動作】
+【実際のエラー全文】
+
+原因の候補を可能性の高い順に挙げ、それぞれの確認方法を教えてください。</pre></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============ 環境構築 ============ -->
+  <section id="setup">
+    <h2>環境構築</h2>
+    <h3>事前にインストールするもの</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>ツール</th><th>用途</th></tr>
+        <tr><td>Git</td><td>バージョン管理</td></tr>
+        <tr><td>Docker（Docker Desktop など社内で利用可能なもの）</td><td>PostgreSQL の起動</td></tr>
+        <tr><td>JDK 25</td><td>Spring Boot の実行</td></tr>
+        <tr><td>Node.js（LTS）</td><td>Next.js の実行</td></tr>
+        <tr><td>VS Code / IntelliJ IDEA</td><td>エディタ（Copilot Free を使う場合は VS Code 推奨）</td></tr>
+        <tr><td>選んだ AI ツール</td><td>Claude デスクトップアプリ（Claude Code）/ Codex アプリ / VS Code の GitHub Copilot 拡張</td></tr>
+      </table>
+    </div>
+
+    <h3>雛形を fork して始める</h3>
+    <ol class="fork-steps">
+      <li>Slack の申請ワークフローで GitHub のユーザー名を送る（ワークフローのリンクは案内のメッセージに載っています）</li>
+      <li>Organization <b>dev-training-lab</b> からの招待メールを開き、7 日以内に参加を承認する（期限が切れたら、案内した人へ Slack で連絡して送り直してもらう）</li>
+      <li><a href="https://github.com/dev-training-lab/genai-webapp-starter">雛形リポジトリ（dev-training-lab/genai-webapp-starter）</a>を開き、右上の <b>Fork</b> で自分のアカウントにコピーする</li>
+      <li>fork の <b>Settings → General → Features</b> で Issues を有効にする（fork では無効になっている）</li>
+      <li>fork を clone し、<code class="inline">backend/</code> と <code class="inline">frontend/</code> を生成して作業を始める</li>
+      <li>最初の push のあと、fork の main から本家の main へ <b>Draft PR</b> を作る。タイトルは「【進捗】題材名」。マージはされず、push するたびに進捗として本家から見える</li>
+    </ol>
+    <p class="note warn"><strong>fork は Private ですが、研修の参加者には見えます。</strong>本家への進捗 Draft PR を通して、ほかの研修生や講師が中身を見られます。業務情報・顧客情報・パスワードや API キーは書かないでください。<code class="inline">.env</code> などの設定ファイルもコミットしません。</p>
+
+    <h3>ディレクトリ構成（例）</h3>
+    <div class="code"><div class="code-title">tree<button class="copy" type="button">コピー</button></div><pre>genai-webapp-starter/       # 自分の fork
+├─ .github/                 # Issue・PR のテンプレート（雛形に入っている）
+├─ docker-compose.yml       # 雛形に入っている
+├─ README.md
+├─ CLAUDE.md                # AI への指示（Codex / Copilot は AGENTS.md）
+├─ docs/
+│   ├─ requirements.md      # 機能一覧・MUST/WANT
+│   ├─ er.md                # ER図（Mermaid 可）
+│   ├─ ai-log.md            # AI活用ログ
+│   └─ templates/           # CLAUDE.md / AGENTS.md の見出しだけの雛形
+├─ backend/                 # Spring Boot（start.spring.io で生成）
+│   └─ src/main/
+│       ├─ java/com/example/app/
+│       │   ├─ controller/
+│       │   ├─ service/
+│       │   ├─ mapper/          # MyBatis の Mapper インターフェース
+│       │   ├─ entity/
+│       │   └─ dto/
+│       └─ resources/
+│           ├─ application.yml
+│           ├─ mapper/          # MyBatis の SQL（XML）
+│           └─ db/migration/V1__init.sql
+└─ frontend/                # Next.js（create-next-app で生成）
+    └─ src/app/</pre></div>
+
+    <h3>CLAUDE.md / AGENTS.md（AI への指示）</h3>
+    <p>AI ツールが作業のたびに読む、プロジェクトの説明書です。リポジトリ直下に置き、Claude Code なら <code class="inline">CLAUDE.md</code>、Codex / GitHub Copilot なら <code class="inline">AGENTS.md</code> という名前にします。下書きを AI に頼んでもかまいませんが、内容は自分で確認し、構成やルールが変わったら更新してください。</p>
+    <div class="code"><div class="code-title">CLAUDE.md / AGENTS.md（例）<button class="copy" type="button">コピー</button></div><pre># プロジェクト概要
+社内の備品・書籍の貸出管理 Web アプリ（新人研修の課題）
+
+# 技術スタック
+- フロントエンド: Next.js（App Router）/ React / TypeScript
+- バックエンド: Java 25 / Spring Boot 4.1 / MyBatis（JPA は使わない）
+- DB: PostgreSQL（Docker）。テーブル定義は Flyway で管理
+
+# よく使うコマンド
+- DB の起動: docker compose up -d
+- バックエンドの起動: cd backend &amp;&amp; ./gradlew bootRun
+- バックエンドのテスト: cd backend &amp;&amp; ./gradlew test
+- フロントエンドの起動: cd frontend &amp;&amp; npm run dev
+
+# コーディング規約
+- 業務ロジックは Service 層に書く
+- SQL は Mapper の XML に書き、値は #{} でバインドする（${} は使わない）
+- 適用済みのマイグレーションは編集せず、新しいファイルを追加する
+
+# AI への依頼ルール
+- 変更は 1 機能・1 ファイル単位で小さく行う
+- 設計の判断が必要なときは、実装の前に選択肢を示して確認する
+- 新しいライブラリは、相談なしに追加しない</pre></div>
+
+    <h3>docker-compose.yml（DB）</h3>
+    <div class="code"><div class="code-title">docker-compose.yml<button class="copy" type="button">コピー</button></div><pre>services:
+  db:
+    image: postgres:16
+    container_name: myapp-db
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:</pre></div>
+
+    <h3>build.gradle（主な依存関係）</h3>
+    <p>Spring Boot 4 ではスターターの構成が変わっています。AI が古い依存関係を提案したら、こちらと見比べてください。</p>
+    <div class="code"><div class="code-title">backend/build.gradle<button class="copy" type="button">コピー</button></div><pre>java {
+    toolchain { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.1.0'
+    implementation 'org.springframework.boot:spring-boot-starter-flyway'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}</pre></div>
+
+    <h3>application.yml（接続設定）</h3>
+    <div class="code"><div class="code-title">backend/src/main/resources/application.yml<button class="copy" type="button">コピー</button></div><pre>spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/app
+    username: app
+    password: app
+  flyway:
+    enabled: true          # テーブルは Flyway で作る
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true   # item_name → itemName</pre></div>
+
+    <h3>よくあるハマりどころ</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>症状</th><th>原因と対処</th></tr>
+        <tr><td>ブラウザで CORS エラー</td><td>3000 → 8080 は別オリジン。Spring 側で CORS を許可するか、Next.js の <code class="inline">rewrites</code> でプロキシする</td></tr>
+        <tr><td>5432 番ポートが使用中</td><td>ローカルに別の PostgreSQL が動いている。止めるか、compose の左側ポートを <code class="inline">"15432:5432"</code> などに変更</td></tr>
+        <tr><td>Flyway の checksum エラー</td><td>適用済みのマイグレーションを編集した。<b>適用済みファイルは触らず</b>新しい <code class="inline">V2__...sql</code> を追加する</td></tr>
+        <tr><td><code class="inline">javax.validation</code> が見つからない</td><td>Spring Boot 3 以降は <code class="inline">jakarta.*</code>。AIが古い書き方を出しがちなので注意</td></tr>
+        <tr><td>MyBatis で <code class="inline">Invalid bound statement (not found)</code></td><td>XML の <code class="inline">namespace</code> / <code class="inline">id</code> が Mapper のクラス名・メソッド名と一致していないか、<code class="inline">mapper-locations</code> の指定が XML の場所と合っていない</td></tr>
+        <tr><td>AI が JPA の <code class="inline">@Entity</code> や <code class="inline">JpaRepository</code> を提案してくる</td><td>このタスクでは使わない。プロンプトに「MyBatis を使う（JPA は使わない）」と明記する</td></tr>
+        <tr><td>Next.js で <code class="inline">useState</code> が使えない</td><td>App Router はデフォルトで Server Component。ファイル先頭に <code class="inline">"use client"</code> が必要</td></tr>
+        <tr><td>日時が9時間ずれる</td><td>タイムゾーンの扱い。DB は <code class="inline">timestamptz</code>、Java は <code class="inline">OffsetDateTime</code> などで統一する</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 成果物・評価 ============ -->
+  <section id="deliver">
+    <h2>成果物と評価観点</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">提出物</h3>
+        <ul class="dots">
+          <li>雛形の fork（本家への進捗 Draft PR で共有）</li>
+          <li>README.md（概要・起動手順・画面キャプチャ）</li>
+          <li>CLAUDE.md または AGENTS.md</li>
+          <li>docs/requirements.md・ER図・API一覧</li>
+          <li><b>docs/ai-log.md</b>（AI活用レポート）
+            <ul class="dots">
+              <li>使ったツールと選んだ理由</li>
+              <li>効果的だったプロンプト / うまくいかなかった例</li>
+              <li>AIの出力を修正・却下した場面とその理由</li>
+              <li>次に活かしたいこと</li>
+            </ul>
+          </li>
+          <li>最終デモ（10分）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">評価観点</h3>
+        <div class="table-wrap" style="margin-top:6px">
+          <table>
+            <tr><th>観点</th><th>見るポイント</th></tr>
+            <tr><td>動作</td><td>README どおりに起動し、MUST 要件が動く</td></tr>
+            <tr><td>理解度</td><td>コードの意図を自分の言葉で説明できる</td></tr>
+            <tr><td>設計</td><td>テーブル・API・レイヤー分けに無理がない</td></tr>
+            <tr><td>品質</td><td>バリデーション・エラー処理・テストがある</td></tr>
+            <tr><td>AI活用</td><td>AIを使い分け、出力を鵜呑みにせず判断している</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="modal-backdrop" id="slackModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="slackTitle">
+    <div class="modal-head">
+      <h2 id="slackTitle">Slack 投稿用の文章</h2>
+      <button class="modal-close" type="button" id="closeSlack" aria-label="閉じる">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tabs" role="tablist">
+        <button type="button" role="tab" data-kind="topic" aria-selected="true">題材の決定報告</button>
+        <button type="button" role="tab" data-kind="progress" aria-selected="false">進捗報告</button>
+      </div>
+      <div class="modal-field">
+        <label for="slackTool">使うAIツール</label>
+        <select id="slackTool">
+          <option value="">（選択してください）</option>
+          <option>Claude Code</option>
+          <option>Codex</option>
+          <option>GitHub Copilot Free</option>
+        </select>
+      </div>
+      <p class="modal-hint" id="slackHint" hidden>題材がまだ選ばれていません。「題材候補」のカードで選ぶと文章に反映されます。</p>
+      <textarea id="slackText" spellcheck="false" aria-label="投稿する文章"></textarea>
+    </div>
+    <div class="modal-foot">
+      <span>そのまま編集できます。タブやツールを切り替えると文章は作り直されます。</span>
+      <button class="modal-copy" type="button" id="copySlack">コピー</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="bar"></div>
+  続編：<a href="genai-webapp-task-2.html">Issue・ADR・ガードレールで AI と開発を回す</a><br>
+  不明点はいつでも気軽に相談してください。楽しんで作りましょう！
+</footer>
+
+<script>
+(function () {
+  var KEY_TOPIC = "genai-task:topic";
+  var KEY_CHECK = "genai-task:checks";
+
+  function load(key, fallback) {
+    try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+    catch (e) { return fallback; }
+  }
+  function save(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+  }
+
+  // 題材の選択
+  var topics = document.querySelectorAll(".topic");
+  function renderTopic(id) {
+    topics.forEach(function (t) {
+      var on = t.dataset.id === id;
+      t.classList.toggle("selected", on);
+      t.querySelector(".pick").textContent = on ? "✓ この題材に決定" : "この題材にする";
+    });
+  }
+  var current = load(KEY_TOPIC, null);
+  renderTopic(current);
+  topics.forEach(function (t) {
+    t.querySelector(".pick").addEventListener("click", function () {
+      current = t.dataset.id;
+      save(KEY_TOPIC, current);
+      renderTopic(current);
+      openModal("topic", this);
+    });
+  });
+
+  // チェックリスト
+  var checks = load(KEY_CHECK, {});
+  var boxes = document.querySelectorAll("#checklist input[type=checkbox]");
+  function renderProgress() {
+    var done = 0;
+    boxes.forEach(function (b) { if (b.checked) done++; });
+    var pct = Math.round(done / boxes.length * 100);
+    document.getElementById("bar").style.width = pct + "%";
+    document.getElementById("pct").textContent = pct + "%";
+  }
+  boxes.forEach(function (b) {
+    b.checked = !!checks[b.dataset.k];
+    b.addEventListener("change", function () {
+      checks[b.dataset.k] = b.checked;
+      save(KEY_CHECK, checks);
+      renderProgress();
+    });
+  });
+  renderProgress();
+
+  // コピー
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.closest(".code").querySelector("pre").innerText;
+      var done = function () {
+        btn.textContent = "コピーしました";
+        setTimeout(function () { btn.textContent = "コピー"; }, 1500);
+      };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else { fallback(); }
+      function fallback() {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+
+  // Slack 投稿用の文章
+  var KEY_TOOL = "genai-task:tool";
+  var modal = document.getElementById("slackModal");
+  var textArea = document.getElementById("slackText");
+  var toolSelect = document.getElementById("slackTool");
+  var hint = document.getElementById("slackHint");
+  var tabs = modal.querySelectorAll(".modal-tabs button");
+  var kind = "topic";
+
+  toolSelect.value = load(KEY_TOOL, "");
+
+  function topicInfo() {
+    var card = current && document.querySelector('.topic[data-id="' + current + '"]');
+    if (!card) return null;
+    var h3 = card.querySelector("h3").cloneNode(true);
+    var badge = h3.querySelector(".recommend");
+    if (badge) badge.remove();
+    var stars = card.querySelector(".stars").cloneNode(true);
+    stars.querySelectorAll(".off").forEach(function (o) { o.remove(); });
+    var filled = stars.textContent.trim().length;
+    var features = Array.prototype.map.call(
+      card.querySelectorAll("dd:first-of-type li"),
+      function (li) { return li.textContent.trim(); }
+    );
+    return {
+      name: h3.textContent.trim(),
+      level: "★★★".slice(0, filled) + "☆☆☆".slice(filled),
+      summary: card.querySelector(".summary").textContent.trim(),
+      features: features
+    };
+  }
+
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
+  }
+
+  function bullets(list) {
+    return list.map(function (s) { return "• " + s; }).join("\n");
+  }
+
+  function buildText() {
+    var t = topicInfo();
+    var tool = toolSelect.value || "（記入）";
+    var topicLine = t ? t.name + "（難易度 " + t.level + "）" : "（未選択）";
+    hint.hidden = !!t;
+
+    if (kind === "topic") {
+      return [
+        ":raising_hand: 研修課題の題材を決めました！",
+        "",
+        "*題材*：" + topicLine,
+        t ? "*概要*：" + t.summary : null,
+        "",
+        "*作る予定の機能*",
+        t ? bullets(t.features) : "• （記入）",
+        "",
+        "*使うAIツール*：" + tool,
+        "*技術スタック*：Next.js + React / Java 25 + Spring Boot 4.1 + MyBatis/ PostgreSQL（Docker）",
+        "",
+        "設計や進め方でアドバイスがあればお願いします :pray:"
+      ].filter(function (l) { return l !== null; }).join("\n");
+    }
+
+    var doneItems = [], todoItems = [];
+    boxes.forEach(function (b) {
+      var week = b.closest(".week").querySelector(".wk").textContent.trim();
+      var label = "[" + week + "] " + b.nextElementSibling.textContent.trim();
+      (b.checked ? doneItems : todoItems).push(label);
+    });
+    var pct = Math.round(doneItems.length / boxes.length * 100);
+    return [
+      ":memo: 研修課題 進捗報告（" + today() + "）",
+      "",
+      "*題材*：" + topicLine,
+      "*使うAIツール*：" + tool,
+      "*進捗*：" + pct + "%（" + doneItems.length + " / " + boxes.length + "）",
+      "",
+      "*完了したこと*",
+      doneItems.length ? bullets(doneItems) : "• まだありません",
+      "",
+      "*次にやること*",
+      todoItems.length ? bullets(todoItems.slice(0, 3)) : "• すべて完了しました :tada:",
+      "",
+      "*困っていること・相談したいこと*",
+      "• （あれば記入）"
+    ].join("\n");
+  }
+
+  function setKind(k) {
+    kind = k;
+    tabs.forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.kind === k)); });
+    textArea.value = buildText();
+  }
+
+  var opener = null;
+  function openModal(k, from) {
+    opener = from || null;
+    setKind(k || kind);
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    textArea.scrollTop = 0;
+    modal.querySelector(".modal-body").scrollTop = 0;
+    document.getElementById("copySlack").focus();
+  }
+  function closeModal() {
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    if (opener) opener.focus();
+  }
+
+  document.getElementById("closeSlack").addEventListener("click", closeModal);
+  modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal.classList.contains("open")) closeModal();
+  });
+  tabs.forEach(function (b) {
+    b.addEventListener("click", function () { setKind(b.dataset.kind); });
+  });
+  toolSelect.addEventListener("change", function () {
+    save(KEY_TOOL, toolSelect.value);
+    textArea.value = buildText();
+  });
+
+  document.getElementById("copySlack").addEventListener("click", function () {
+    var btn = this;
+    var text = textArea.value;
+    var done = function () {
+      btn.textContent = "✓ コピーしました";
+      setTimeout(function () { btn.textContent = "コピー"; }, 1500);
+    };
+    var fallback = function () {
+      textArea.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+  });
+})();
+</script>
+</body>
+</html>

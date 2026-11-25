@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Issue駆動とガードレール</title>
+<style>
+  :root {
+    --pink: #FF3399;
+    --pink-dark: #C8006A;
+    --pink-tint: #FFF0F7;
+    --pink-line: #FFC2E0;
+    --ink: #2B2B33;
+    --ink-sub: #5F6070;
+    --line: #E6E6EC;
+    --bg: #FAFAFC;
+    --card: #FFFFFF;
+    --code-bg: #2A2433;
+    --code-ink: #F5EEF8;
+    --ok: #1F9D6B;
+    --warn: #C77700;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+  body {
+    margin: 0;
+    font-family: "Meiryo UI", Meiryo, "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.75;
+    font-size: 15px;
+  }
+
+  /* ---------- header ---------- */
+  .hero {
+    background: var(--pink);
+    color: #fff;
+    padding: 40px 16px 32px;
+  }
+  .hero-inner { max-width: 980px; margin: 0 auto; }
+  .hero .label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: .1em;
+    border: 1.5px solid rgba(255,255,255,.8);
+    border-radius: 999px;
+    padding: 2px 12px;
+    margin-bottom: 12px;
+  }
+  .hero h1 { margin: 0 0 8px; font-size: 30px; line-height: 1.35; }
+  .hero p.lead { margin: 0; font-size: 16px; opacity: .95; }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .meta div {
+    background: rgba(255,255,255,.16);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    min-width: 150px;
+  }
+  .meta b { display: block; font-size: 15px; }
+
+  /* ---------- nav ---------- */
+  nav.toc {
+    position: sticky; top: 0; z-index: 10;
+    background: #fff;
+    border-bottom: 3px solid var(--pink);
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  }
+  nav.toc ul {
+    max-width: 980px; margin: 0 auto; padding: 0 8px;
+    list-style: none; display: flex; overflow-x: auto; white-space: nowrap;
+  }
+  nav.toc a {
+    display: block; padding: 12px 12px;
+    color: var(--ink-sub); text-decoration: none; font-size: 13px; font-weight: bold;
+  }
+  nav.toc a:hover { color: var(--pink-dark); }
+
+  /* ---------- layout ---------- */
+  main { max-width: 980px; margin: 0 auto; padding: 8px 16px 64px; }
+  section { margin-top: 48px; }
+  h2 {
+    font-size: 22px; margin: 0 0 16px;
+    padding: 4px 0 4px 14px;
+    border-left: 6px solid var(--pink);
+  }
+  h2 small { font-size: 13px; color: var(--ink-sub); font-weight: normal; margin-left: 8px; }
+  h3 { font-size: 17px; margin: 24px 0 8px; color: var(--pink-dark); }
+  p { margin: 8px 0; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .note {
+    background: var(--pink-tint);
+    border: 1px solid var(--pink-line);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  .note.warn { background: #FFF7E8; border-color: #F3D49B; }
+  .note strong { color: var(--pink-dark); }
+  .note.warn strong { color: var(--warn); }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  ul.dots { padding-left: 1.3em; margin: 6px 0; }
+  ul.dots li { margin: 3px 0; }
+  .tag {
+    display: inline-block; font-size: 12px; font-weight: bold;
+    border-radius: 4px; padding: 1px 8px; margin-right: 4px;
+    background: var(--pink-tint); color: var(--pink-dark); border: 1px solid var(--pink-line);
+  }
+  .tag.gray { background: #F1F1F5; color: var(--ink-sub); border-color: var(--line); }
+
+  /* ---------- goal ---------- */
+  .goals { counter-reset: g; list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .goals li {
+    counter-increment: g; position: relative;
+    background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    padding: 12px 16px 12px 56px;
+  }
+  .goals li::before {
+    content: counter(g);
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--pink); color: #fff; font-weight: bold;
+    display: grid; place-items: center;
+  }
+
+  /* ---------- AI tool flow ---------- */
+  .flow { display: grid; gap: 12px; }
+  .flow-row {
+    display: grid; grid-template-columns: 1fr 40px 1fr; align-items: center; gap: 8px;
+  }
+  .q {
+    background: #fff; border: 2px solid var(--pink); border-radius: 10px;
+    padding: 12px 14px; font-weight: bold;
+  }
+  .arrow { text-align: center; color: var(--pink); font-weight: bold; font-size: 13px; }
+  .arrow::after { content: "→"; display: block; font-size: 22px; line-height: 1; }
+  .ans {
+    background: var(--pink); color: #fff; border-radius: 10px; padding: 12px 14px;
+  }
+  .ans b { font-size: 17px; }
+  .ans span { display: block; font-size: 13px; opacity: .95; }
+  .ans.alt { background: #fff; color: var(--ink); border: 2px dashed var(--pink); }
+  .ans.alt b { color: var(--pink-dark); }
+
+  /* ---------- tables ---------- */
+  table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--pink-tint); color: var(--pink-dark); white-space: nowrap; }
+  .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--line); }
+  .table-wrap table { border: none; }
+  .table-wrap tr:first-child th { border-top: none; }
+  .table-wrap tr th:first-child, .table-wrap tr td:first-child { border-left: none; }
+  .table-wrap tr th:last-child, .table-wrap tr td:last-child { border-right: none; }
+  .table-wrap tr:last-child td { border-bottom: none; }
+
+  /* ---------- architecture ---------- */
+  .arch { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .arch svg { width: 100%; height: auto; display: block; }
+
+  /* ---------- topics ---------- */
+  .topics { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+  .topic {
+    background: #fff; border: 2px solid var(--line); border-radius: 12px;
+    padding: 18px 18px 14px; display: flex; flex-direction: column;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .topic.selected { border-color: var(--pink); box-shadow: 0 0 0 4px var(--pink-tint); }
+  .topic-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .topic h3 { margin: 0; color: var(--ink); font-size: 17px; }
+  .topic .no { color: var(--pink); font-weight: bold; font-size: 13px; }
+  .stars { color: var(--pink); letter-spacing: 2px; white-space: nowrap; font-size: 14px; }
+  .stars .off { color: #DDD; }
+  .topic .summary { color: var(--ink-sub); font-size: 13.5px; margin: 6px 0 10px; }
+  .topic dl { margin: 0; font-size: 13.5px; }
+  .topic dt { font-weight: bold; color: var(--pink-dark); margin-top: 8px; }
+  .topic dd { margin: 2px 0 0; }
+  .topic dd ul { margin: 0; padding-left: 1.2em; }
+  .topic .spacer { flex: 1; }
+  .pick {
+    margin-top: 14px; width: 100%;
+    font: inherit; font-weight: bold; font-size: 14px;
+    border: 2px solid var(--pink); color: var(--pink-dark); background: #fff;
+    border-radius: 8px; padding: 8px; cursor: pointer;
+  }
+  .pick:hover { background: var(--pink-tint); }
+  .topic.selected .pick { background: var(--pink); color: #fff; }
+  .recommend {
+    display: inline-block; background: var(--pink); color: #fff; font-size: 11px; font-weight: bold;
+    border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px;
+  }
+
+  /* ---------- code ---------- */
+  .code {
+    position: relative; background: var(--code-bg); color: var(--code-ink);
+    border-radius: 10px; margin: 10px 0; overflow: hidden;
+  }
+  .code .code-title {
+    font-size: 12px; color: #D9C6E6; padding: 8px 14px; border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .code pre {
+    margin: 0; padding: 14px; overflow-x: auto;
+    font-family: Consolas, "SFMono-Regular", Menlo, monospace; font-size: 13px; line-height: 1.6;
+  }
+  .copy {
+    font: inherit; font-size: 12px; color: #fff; background: rgba(255,51,153,.85);
+    border: none; border-radius: 6px; padding: 3px 10px; cursor: pointer;
+  }
+  .copy:hover { background: var(--pink); }
+  code.inline {
+    font-family: Consolas, Menlo, monospace; font-size: 13px;
+    background: #F1F1F5; border-radius: 4px; padding: 1px 6px;
+  }
+
+  /* ---------- schedule / checklist ---------- */
+  .progress-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .progress { flex: 1; height: 12px; background: #EEE; border-radius: 999px; overflow: hidden; }
+  .progress > div { height: 100%; width: 0; background: var(--pink); transition: width .25s; }
+  .progress-label { font-weight: bold; color: var(--pink-dark); min-width: 72px; text-align: right; }
+  .weeks { display: grid; gap: 14px; }
+  .week { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .week-head {
+    display: flex; gap: 12px; align-items: center;
+    padding: 10px 16px; background: var(--pink-tint); border-bottom: 1px solid var(--pink-line);
+  }
+  .week-head .wk {
+    background: var(--pink); color: #fff; font-weight: bold; font-size: 13px;
+    border-radius: 6px; padding: 2px 10px; white-space: nowrap;
+  }
+  .week-head h3 { margin: 0; font-size: 16px; color: var(--ink); }
+  .week ul { list-style: none; margin: 0; padding: 8px 16px 12px; }
+  .week li { padding: 4px 0; }
+  .week label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+  .week input[type=checkbox] { accent-color: var(--pink); width: 18px; height: 18px; margin-top: 4px; flex: none; }
+  .week input:checked + span { color: #9A9AA6; text-decoration: line-through; }
+
+  /* ---------- requirements ---------- */
+  .req h3 { display: flex; align-items: center; gap: 8px; margin-top: 0; }
+  .req ul { margin: 0; padding-left: 1.3em; }
+  .req li { margin: 4px 0; }
+
+  /* ---------- prompts ---------- */
+  details.prompt {
+    background: #fff; border: 1px solid var(--line); border-radius: 10px; margin: 10px 0;
+  }
+  details.prompt summary {
+    cursor: pointer; padding: 12px 16px; font-weight: bold; list-style: none;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  details.prompt summary::-webkit-details-marker { display: none; }
+  details.prompt summary::after { content: "＋"; color: var(--pink); font-size: 18px; }
+  details.prompt[open] summary::after { content: "－"; }
+  details.prompt .body { padding: 0 16px 14px; }
+
+  footer {
+    text-align: center; color: var(--ink-sub); font-size: 12px;
+    padding: 24px 16px 40px; border-top: 1px solid var(--line);
+  }
+  footer .bar { height: 6px; background: var(--pink); margin-bottom: 24px; }
+
+  /* ---------- slack modal ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 30;
+    background: rgba(30,20,35,.5);
+    display: none; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 14px; width: 100%; max-width: 640px;
+    max-height: calc(100vh - 32px); display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,.25);
+  }
+  .modal-head {
+    background: var(--pink); color: #fff;
+    display: flex; justify-content: space-between; align-items: center; padding: 14px 18px;
+  }
+  .modal-head h2 { border: none; padding: 0; margin: 0; font-size: 17px; color: #fff; }
+  .modal-close {
+    font: inherit; font-size: 22px; line-height: 1; color: #fff; background: none;
+    border: none; cursor: pointer; padding: 0 4px;
+  }
+  .modal-body { padding: 16px 18px; overflow-y: auto; }
+  .modal-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .modal-tabs button {
+    font: inherit; font-size: 13px; font-weight: bold; cursor: pointer;
+    border: 2px solid var(--pink); background: #fff; color: var(--pink-dark);
+    border-radius: 999px; padding: 4px 14px;
+  }
+  .modal-tabs button[aria-selected="true"] { background: var(--pink); color: #fff; }
+  .modal-field { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13px; }
+  .modal-field select { font: inherit; font-size: 13px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; }
+  .modal-hint { font-size: 12.5px; color: var(--warn); margin: 0 0 8px; }
+  .modal textarea {
+    width: 100%; height: 300px; max-height: 50vh; resize: vertical;
+    font-family: "Meiryo UI", Meiryo, sans-serif; font-size: 13.5px; line-height: 1.7;
+    border: 1px solid var(--line); border-radius: 8px; padding: 12px;
+  }
+  .modal textarea:focus { outline: 2px solid var(--pink-line); border-color: var(--pink); }
+  .modal-foot {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 12px 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-sub);
+  }
+  .modal-copy {
+    font: inherit; font-weight: bold; font-size: 14px; cursor: pointer; white-space: nowrap;
+    background: var(--pink); color: #fff; border: none; border-radius: 8px; padding: 8px 18px;
+  }
+  .modal-copy:hover { background: var(--pink-dark); }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 23px; }
+    .flow-row { grid-template-columns: 1fr; }
+    .arrow::after { content: "↓"; }
+    .card { padding: 16px; }
+  }
+  @media print {
+    nav.toc, .pick, .copy, .modal-backdrop { display: none !important; }
+    body { background: #fff; font-size: 12px; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    section { break-inside: avoid-page; }
+    details.prompt { break-inside: avoid; }
+    details.prompt .body { display: block !important; }
+  }
+
+  /* ---------- part 2 ---------- */
+  .hero-link { color: #fff; }
+  .where { font-size: 13px; color: var(--ink-sub); margin-top: 10px; }
+  .steps {
+    counter-reset: s; list-style: none; padding: 0; margin: 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;
+  }
+  .steps li {
+    counter-increment: s; position: relative;
+    background: #fff; border: 1px solid var(--line); border-top: 4px solid var(--pink);
+    border-radius: 10px; padding: 12px 14px 12px 50px;
+  }
+  .steps li::before {
+    content: counter(s);
+    position: absolute; left: 12px; top: 12px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--pink); color: #fff; font-weight: bold; font-size: 14px;
+    display: grid; place-items: center;
+  }
+  .steps b { display: block; }
+  .steps span { display: block; font-size: 13px; color: var(--ink-sub); }
+  .layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .layers > div {
+    background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+  }
+  .layers .wk {
+    background: var(--pink); color: #fff; font-weight: bold; font-size: 13px;
+    border-radius: 6px; padding: 1px 9px; margin-right: 8px;
+  }
+  .layers span:not(.wk) { display: block; font-size: 13px; color: var(--ink-sub); margin-top: 4px; }
+  .report-btn {
+    font: inherit; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap;
+    background: #fff; color: var(--pink-dark); border: 2px solid var(--pink); border-radius: 8px; padding: 5px 12px;
+  }
+  .report-btn:hover { background: var(--pink-tint); }
+  footer a { color: var(--pink-dark); }
+  @media (max-width: 640px) {
+    .progress-wrap { flex-wrap: wrap; }
+    .report-btn { width: 100%; }
+  }
+  @media print { .report-btn { display: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="label">TRAINING TASK ・ PART 2</span>
+    <h1>Issue・ADR・ガードレールで<br>AIと開発を回す</h1>
+    <p class="lead">前編で作ったアプリを土台に、AIが迷わず・はみ出さずに働ける仕組みを整え、Issue 駆動で機能を追加する。</p>
+    <div class="meta">
+      <div>期間の目安<b>3週間</b></div>
+      <div>前提<b><a class="hero-link" href="genai-webapp-task.html">前編</a> を完了</b></div>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="目次">
+  <ul>
+    <li><a href="#goal">ゴール</a></li>
+    <li><a href="#concept">考え方</a></li>
+    <li><a href="#flow">開発の流れ</a></li>
+    <li><a href="#adr">ADR</a></li>
+    <li><a href="#issue">Issue と PR</a></li>
+    <li><a href="#harness">ハーネス</a></li>
+    <li><a href="#guardrail">ガードレール</a></li>
+    <li><a href="#schedule">進め方</a></li>
+    <li><a href="#deliver">成果物・評価</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <!-- ============ ゴール ============ -->
+  <section id="goal">
+    <h2>このタスクのゴール</h2>
+    <ol class="goals">
+      <li>作業を始める前に、<b>Issue に「何を・どこまで」</b>を書いてから AI に頼む</li>
+      <li>設計の判断を <b>ADR</b> に残し、人にも AI にも「なぜそうしたか」が伝わる状態にする</li>
+      <li>AI の作業環境（<b>ハーネス</b>）を整え、AI が自分の変更を自分で検証できるようにする</li>
+      <li>守りたいルールを、お願いではなく<b>仕組み（ガードレール）</b>で守る</li>
+    </ol>
+    <p class="note" style="margin-top:16px"><strong>AI への指示は、守られないことがあります。</strong>CLAUDE.md や AGENTS.md に書いたルールも、AI が読み落としたり誤解したりします。破られて困るルールは、テスト・フック・CI など<b>機械が必ず止める</b>形にするのがこのタスクの中心です。</p>
+  </section>
+
+  <!-- ============ 考え方 ============ -->
+  <section id="concept">
+    <h2>4つの道具の役割</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0"><span class="tag">Issue</span>何を・どこまで</h3>
+        <p>作業の目的と受け入れ条件、やらないことを書く。AI への依頼の出発点で、PR とつながって「なぜこの変更をしたか」の記録になる。</p>
+        <p class="where">置き場所：fork の Issues</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0"><span class="tag">ADR</span>なぜそう決めたか</h3>
+        <p>Architecture Decision Record。あとから変えにくい設計判断を、背景・選んだ案・捨てた案とともに1件1ファイルで残す。</p>
+        <p class="where">置き場所：<code class="inline">docs/adr/</code></p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0"><span class="tag">ハーネス</span>AI の作業環境</h3>
+        <p>AI が正しく働くための足場。指示ファイル、ひと言で回せる検証コマンド、完了の定義、ツールの権限設定など。</p>
+        <p class="where">置き場所：<code class="inline">CLAUDE.md</code> / <code class="inline">AGENTS.md</code>、各ツールの設定</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0"><span class="tag">ガードレール</span>はみ出したら止める</h3>
+        <p>ルール違反を機械的に検出して止める仕組み。人が書いても AI が書いても同じように効く。</p>
+        <p class="where">置き場所：テスト、git フック、CI</p>
+      </div>
+    </div>
+
+    <h3>守りたいことを、どこに書くか</h3>
+    <p>同じルールを「指示」と「仕組み」の両方に書くのが基本です。指示は AI が最初から正しく書くため、仕組みは間違えたときに止めるためにあります。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>守りたいこと</th><th>指示（CLAUDE.md / AGENTS.md）</th><th>仕組み（ガードレール）</th></tr>
+        <tr><td>コードの書式をそろえる</td><td>—</td><td>Spotless（<code class="inline">./gradlew check</code> で検出）</td></tr>
+        <tr><td>Controller から Mapper を直接呼ばない</td><td>レイヤーの規約として書く</td><td>ArchUnit のテスト</td></tr>
+        <tr><td>適用済みのマイグレーションを編集しない</td><td>規約として書く</td><td>pre-commit フック ＋ CI</td></tr>
+        <tr><td>テストが通らない変更をマージしない</td><td>「check が通るまで完了にしない」と書く</td><td>CI（通るまでマージしない）</td></tr>
+        <tr><td>秘密情報を読ませない・コミットしない</td><td>書く</td><td>gitleaks（pre-commit フック ＋ CI）、<code class="inline">.gitignore</code>、Claude Code の deny 設定</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 開発の流れ ============ -->
+  <section id="flow">
+    <h2>開発の流れ <small>1つの機能をこの順で回す</small></h2>
+    <ol class="steps">
+      <li><b>Issue を書く</b><span>目的・受け入れ条件・範囲外</span></li>
+      <li><b>ADR を書く</b><span>設計の判断があるときだけ</span></li>
+      <li><b>ブランチを切る</b><span><code class="inline">feature/12-reservation</code></span></li>
+      <li><b>AI と実装</b><span>計画 → 実装 → AI 自身が検証</span></li>
+      <li><b>ガードレール</b><span>pre-commit とテストで止まる</span></li>
+      <li><b>PR を出す</b><span><code class="inline">Closes #12</code> と ADR へのリンク</span></li>
+      <li><b>CI とレビュー</b><span>通ったら fork の main へマージ</span></li>
+      <li><b>振り返る</b><span>同じ失敗は仕組みに還元</span></li>
+    </ol>
+    <div class="grid2" style="margin-top:16px">
+      <div class="note"><strong>作業はすべて自分の fork の中で行います。</strong>Issue も PR も fork 側に作り、fork の main へマージします。本家（<code class="inline">dev-training-lab/genai-webapp-starter</code>）へマージすることはありません。</div>
+      <div class="note"><strong>進捗は本家への Draft PR で共有します。</strong>前編で作った「進捗」Draft PR は fork の main を指しているので、fork でマージするたびに自動で更新されます。</div>
+    </div>
+  </section>
+
+  <!-- ============ ADR ============ -->
+  <section id="adr">
+    <h2>ADR（設計判断の記録）</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">書くとき</h3>
+        <ul class="dots">
+          <li>複数の案で迷い、どれかを選んだ</li>
+          <li>あとから変えるのが大変（DB 設計、認証方式、ライブラリの採用など）</li>
+          <li>レビューで「なぜこうしたの？」と聞かれそう</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">書き方のルール</h3>
+        <ul class="dots">
+          <li>1つの判断につき1ファイル。<code class="inline">docs/adr/0002-use-mybatis.md</code> のように連番を振る</li>
+          <li><b>捨てた案と理由</b>も書く（AI が同じ案を何度も提案するのを防げる）</li>
+          <li>「採用」にしたあとは書き換えない。判断を変えるときは新しい ADR を書き、古い方の状態を「置き換え済み」にする</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>テンプレート（例：前編の判断を後から記録したもの）</h3>
+    <div class="code"><div class="code-title">docs/adr/0002-use-mybatis.md<button class="copy" type="button">コピー</button></div><pre># 0002. DB アクセスに MyBatis を使う
+
+- 状態: 採用
+- 日付: YYYY-MM-DD
+- 関連: #3
+
+## 背景
+検索条件が変わる一覧検索や、月別の集計がある。
+SQL を自分で書いて読める状態にしたい。
+
+## 決定
+DB アクセスには MyBatis を使い、SQL は Mapper の XML に書く。
+Controller から Mapper を直接呼ばず、必ず Service を経由する。
+
+## 検討した案
+- Spring Data JPA: 単純な CRUD は楽だが、発行される SQL が見えにくい。採用しない
+- JPA と MyBatis の併用: 同じトランザクション内で更新が見えない問題が起きやすい。採用しない
+
+## 影響
+- SQL を書く量は増えるが、実行される SQL をレビューで確認できる
+- レイヤーの決まりは ArchUnit のテストで守る</pre></div>
+    <p class="note">最初の週に、前編で決めたことを後から ADR にします（例：<b>0001 ADR を使う</b>、<b>0002 MyBatis を使う</b>、<b>0003 フロントから API への接続方式</b>）。決めた理由を思い出せないものは、AI に当時のコードを読ませて下書きさせ、自分で直してください。</p>
+  </section>
+
+  <!-- ============ Issue と PR ============ -->
+  <section id="issue">
+    <h2>Issue と PR</h2>
+    <div class="note warn"><strong>最初に fork の Issues を有効にしてください。</strong>fork では Issues が無効になっています。fork の <b>Settings → General → Features</b> で Issues にチェックを入れます。</div>
+
+    <h3>Issue の書き方</h3>
+    <p>雛形の <code class="inline">.github/ISSUE_TEMPLATE/task.yml</code> により、Issue 作成画面に次の項目が出ます。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>項目</th><th>書くこと</th><th>よくない例 → よい例</th></tr>
+        <tr><td>背景・目的</td><td>なぜ必要か</td><td>「予約機能」→「貸出中の本を、返却後すぐ借りられるよう順番待ちしたい」</td></tr>
+        <tr><td>受け入れ条件</td><td>完了を確認できるチェックリスト</td><td>「予約できる」→「貸出中の備品だけ予約できる」「同じ人は同じ備品を二重に予約できない」</td></tr>
+        <tr><td>範囲外</td><td>今回やらないこと</td><td>「予約者への通知メールは送らない」</td></tr>
+        <tr><td>関連する ADR</td><td>従うべき設計判断</td><td><code class="inline">docs/adr/0002-use-mybatis.md</code></td></tr>
+      </table>
+    </div>
+    <p class="note" style="margin-top:12px"><strong>1 Issue ＝ 1 ブランチ ＝ 1 PR。</strong>1つの PR で読みきれない大きさなら、Issue を分けます。AI に一度に頼む量も、この単位に収めます。</p>
+
+    <h3>PR の書き方</h3>
+    <p>雛形の <code class="inline">.github/pull_request_template.md</code> が PR の説明欄に入ります。<code class="inline">Closes #12</code> と書いておくと、main へマージしたときに Issue が自動で閉じます。</p>
+
+    <h3>プロンプト例</h3>
+    <details class="prompt">
+      <summary>Issue を書く前の壁打ち</summary>
+      <div class="body">
+        <div class="code"><div class="code-title">prompt<button class="copy" type="button">コピー</button></div><pre>備品貸出アプリに「予約」機能を追加したいです。
+以下は私が考えた Issue の下書きです。
+
+1. 受け入れ条件に抜けや、確認できない書き方がないか指摘してください
+2. 1つの PR で収まらない大きさなら、Issue の分け方を提案してください
+3. 設計の判断が必要な点（ADR を書くべき点）を挙げてください
+まだコードは書かないでください。
+
+（ここに Issue の下書きを貼る）</pre></div>
+      </div>
+    </details>
+    <details class="prompt">
+      <summary>Issue から実装計画を立てる</summary>
+      <div class="body">
+        <div class="code"><div class="code-title">prompt<button class="copy" type="button">コピー</button></div><pre>Issue #12 を実装します。gh issue view 12 で内容を確認してください。
+
+1. docs/adr/ を読み、この Issue に関係する決定を挙げてください
+2. 変更するファイルと手順を、小さなステップに分けて提案してください
+3. ADR の決定に反する変更が必要なら、実装せずに理由と代案を示してください
+計画に私が OK を出すまで、コードは書かないでください。</pre></div>
+        <p style="font-size:13px;color:var(--ink-sub)">gh（GitHub CLI）が使えない場合や Copilot を使う場合は、Issue の本文を貼り付けてください。</p>
+      </div>
+    </details>
+    <details class="prompt">
+      <summary>ADR の下書き</summary>
+      <div class="body">
+        <div class="code"><div class="code-title">prompt<button class="copy" type="button">コピー</button></div><pre>予約の重複を防ぐ方法として、
+A: アプリで事前に SELECT して確認する
+B: DB の UNIQUE 制約で防ぐ
+で迷っています。B にしたいと考えています。
+
+docs/adr/ の既存の ADR と同じ形式で、0004 の下書きを書いてください。
+「検討した案」には A を捨てた理由も書いてください。
+私の判断に問題があれば、書く前に指摘してください。</pre></div>
+      </div>
+    </details>
+    <details class="prompt">
+      <summary>レビュー指摘を仕組みにする</summary>
+      <div class="body">
+        <div class="code"><div class="code-title">prompt<button class="copy" type="button">コピー</button></div><pre>レビューで、次の指摘を2回受けました。
+「Controller で業務ルールをチェックしている。Service に移すこと」
+
+1. この指摘を、テスト・ArchUnit・lint・フックのどれかで機械的に検出できるか検討してください
+2. 機械で検出しにくい場合は、AGENTS.md に追記する文面を提案してください
+3. どちらの場合も、導入したら既存のコードで違反が出るかを確認してください</pre></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ============ ハーネス ============ -->
+  <section id="harness">
+    <h2>ハーネス（AI の作業環境）を整える</h2>
+    <p>AI は、渡された情報と使えるコマンドの範囲でしか働けません。前編で作った <code class="inline">CLAUDE.md</code> / <code class="inline">AGENTS.md</code> に、<b>どこを読むか・どう確かめるか・いつ完了か</b>を書き足します。</p>
+    <div class="code"><div class="code-title">CLAUDE.md / AGENTS.md に追記する例<button class="copy" type="button">コピー</button></div><pre># 作業の進め方
+- 着手する前に、対象の Issue と docs/adr/ を読む
+- ADR の決定に反する変更が必要なときは、実装せずに理由と代案を示す
+- 設計の判断をしたら、docs/adr/ に ADR の下書きを追加する
+- git push はしない（push は人が行う）
+
+# 完了の定義
+次がすべて通るまで「完了」と報告しない。通らなかったときは、失敗の内容をそのまま報告する。
+- バックエンド: cd backend &amp;&amp; ./gradlew check
+- フロントエンド: cd frontend &amp;&amp; npm run lint &amp;&amp; npm run build
+
+# 守ること（違反はテストとフックでも検出される）
+- Controller から Mapper を直接呼ばない（ADR-0002）
+- 適用済みのマイグレーションは編集しない
+- 書式は ./gradlew spotlessApply でそろえる</pre></div>
+
+    <h3>ツールごとの設定</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>ツール</th><th>設定すること</th></tr>
+        <tr><td>Claude Code</td><td><code class="inline">.claude/settings.json</code> で読ませないファイルや実行させないコマンドを指定し、リポジトリにコミットする。慣れてきたら hooks で、ファイル編集のたびにチェックを自動実行することもできる</td></tr>
+        <tr><td>Codex</td><td>アプリのアクセス権は、承認を求める設定から始める。慣れてきたら <code class="inline">.codex/</code> にコマンドのルールや hooks を置ける（信頼済みのプロジェクトでだけ読み込まれる）</td></tr>
+        <tr><td>GitHub Copilot</td><td>ツール側の制御には頼らず、git フックと CI で守る</td></tr>
+      </table>
+    </div>
+    <div class="code"><div class="code-title">.claude/settings.json（Claude Code の例）<button class="copy" type="button">コピー</button></div><pre>{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Bash(git push *)"
+    ]
+  }
+}</pre></div>
+    <p class="note warn"><strong>ツールの設定はガードレールの一部にすぎません。</strong>使うツールによって効く・効かないがあり、設定の書き方でもすり抜けることがあります。必ず守りたいことは、次の git フックと CI でも止めてください。</p>
+  </section>
+
+  <!-- ============ ガードレール ============ -->
+  <section id="guardrail">
+    <h2>ガードレールを入れる <small>手元で止め、CI でも止める</small></h2>
+    <div class="layers">
+      <div><span class="wk">1</span><b>テスト</b><span>Spotless と ArchUnit を <code class="inline">./gradlew check</code> に組み込む</span></div>
+      <div><span class="wk">2</span><b>pre-commit フック</b><span>秘密情報・マイグレーション・書式を、コミットする前に手元で止める</span></div>
+      <div><span class="wk">3</span><b>CI</b><span>PR ごとに同じチェックを GitHub で実行する</span></div>
+      <div><span class="wk">4</span><b>マージのルール</b><span>CI が通らない PR は main へマージしない</span></div>
+    </div>
+
+    <h3>① Spotless と ArchUnit</h3>
+    <div class="code"><div class="code-title">backend/build.gradle（追加する部分）<button class="copy" type="button">コピー</button></div><pre>plugins {
+    // 既存のプラグインに追加
+    id 'com.diffplug.spotless' version '8.12.0'
+}
+
+dependencies {
+    // 既存の依存関係に追加
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.5.1'
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+        removeUnusedImports()
+    }
+}</pre></div>
+    <div class="code"><div class="code-title">backend/src/test/java/com/example/app/ArchitectureTest.java<button class="copy" type="button">コピー</button></div><pre>package com.example.app;
+
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+
+import com.tngtech.archunit.core.importer.ImportOption;
+import com.tngtech.archunit.junit.AnalyzeClasses;
+import com.tngtech.archunit.junit.ArchTest;
+import com.tngtech.archunit.lang.ArchRule;
+
+@AnalyzeClasses(packages = "com.example.app", importOptions = ImportOption.DoNotIncludeTests.class)
+class ArchitectureTest {
+
+  @ArchTest
+  static final ArchRule controllerDoesNotUseMapper =
+      noClasses()
+          .that()
+          .resideInAPackage("..controller..")
+          .should()
+          .dependOnClassesThat()
+          .resideInAPackage("..mapper..")
+          .because("DB アクセスは Service を経由する（ADR-0002）");
+
+  @ArchTest
+  static final ArchRule serviceDoesNotUseController =
+      noClasses()
+          .that()
+          .resideInAPackage("..service..")
+          .should()
+          .dependOnClassesThat()
+          .resideInAPackage("..controller..");
+}</pre></div>
+    <p>書式が崩れていると <code class="inline">./gradlew check</code> が失敗し、<code class="inline">./gradlew spotlessApply</code> で自動修正できます。<code class="inline">.because(...)</code> に ADR の番号を書いておくと、違反したときに AI も人も理由をたどれます。</p>
+
+    <h3>② pre-commit フック</h3>
+    <div class="code"><div class="code-title">.githooks/pre-commit<button class="copy" type="button">コピー</button></div><pre>#!/bin/sh
+# 秘密情報（API キーやパスワードなど）が含まれていないかを調べる
+if command -v gitleaks &gt;/dev/null 2&gt;&amp;1; then
+  gitleaks git --pre-commit --staged --redact --no-banner . || {
+    echo "秘密情報らしき文字列が見つかりました。該当する行をコミットから外してください" &gt;&amp;2
+    exit 1
+  }
+else
+  echo "gitleaks が見つからないため、秘密情報のチェックを飛ばしました（CI では実行されます）" &gt;&amp;2
+fi
+
+# 適用済み（コミット済み）のマイグレーションの変更・削除・名前変更を止める
+changed=$(git diff --cached --name-only --diff-filter=MDR -- backend/src/main/resources/db/migration/)
+if [ -n "$changed" ]; then
+  echo "適用済みのマイグレーションは変更できません。新しい V*__*.sql を追加してください:" &gt;&amp;2
+  echo "$changed" &gt;&amp;2
+  exit 1
+fi
+
+# バックエンドに変更があるときだけ書式をチェックする
+if git diff --cached --name-only | grep -q '^backend/'; then
+  (cd backend &amp;&amp; ./gradlew -q spotlessCheck) || {
+    echo "書式が崩れています。cd backend &amp;&amp; ./gradlew spotlessApply を実行してください" &gt;&amp;2
+    exit 1
+  }
+fi</pre></div>
+    <p>秘密情報のチェックには <a href="https://github.com/gitleaks/gitleaks">gitleaks</a> を使います。macOS なら <code class="inline">brew install gitleaks</code>、Windows なら公式の Releases から入手してください。入っていない場合、フックは警告を出して先に進み、CI で止まります。</p>
+    <div class="code"><div class="code-title">フックを有効にする（clone するたびに1回）<button class="copy" type="button">コピー</button></div><pre>chmod +x .githooks/pre-commit
+git config core.hooksPath .githooks</pre></div>
+    <p class="note warn"><strong>フックは <code class="inline">git commit --no-verify</code> で飛ばせます。</strong>そのため、同じチェックを CI でも必ず行います。AI がフックを飛ばしてコミットしようとしたら、止めて理由を確認してください。</p>
+
+    <h3>③ CI（GitHub Actions）</h3>
+    <div class="code"><div class="code-title">.github/workflows/ci.yml<button class="copy" type="button">コピー</button></div><pre>name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: app
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+        ports:
+          - 5432:5432
+        options: &gt;-
+          --health-cmd "pg_isready -U app"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: gradle
+      - run: ./gradlew check
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  migration-guard:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: 適用済みマイグレーションの変更を検出
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          changed=$(git diff --name-only --diff-filter=MDR "origin/$BASE_REF...HEAD" -- backend/src/main/resources/db/migration/)
+          if [ -n "$changed" ]; then
+            echo "::error::適用済みのマイグレーションが変更されています: $changed"
+            exit 1
+          fi
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: 秘密情報のチェック
+        run: docker run --rm -v "$PWD:/repo" -w /repo zricethezav/gitleaks:v8.30.1 git --redact --no-banner .</pre></div>
+    <div class="note"><strong>fork の Actions を確認してください。</strong>ワークフローを追加したら fork の <b>Actions</b> タブを開き、止まっていれば有効にします。fork は Private なので、実行時間は<b>自分のアカウントの無料枠</b>から使われます。CI は PR と main への push のときだけ動かし、無駄に回さないようにしましょう。</div>
+
+    <h3>④ マージのルール</h3>
+    <p>無料プランの Private リポジトリでは、「CI が通らないとマージできない」設定（ブランチ保護）を使えない場合があります。そのため、次を自分のルールとして守ります。</p>
+    <ul class="dots">
+      <li>main へは直接 push せず、必ず PR を通す</li>
+      <li>CI が緑になってからマージする。赤いままマージしない</li>
+      <li>AI に「マージして」と頼まない。マージは自分の目で CI を確かめてから行う</li>
+    </ul>
+    <p>fork の <b>Settings → Branches</b> でブランチ保護を設定できる場合は、PR とステータスチェックを必須にしておくと確実です。</p>
+
+    <h3>効いているかを確かめる</h3>
+    <p>入れただけでは、本当に止まるか分かりません。<b>わざと違反して</b>、止まることを確かめてから ai-log に記録します。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>わざとやること</th><th>止まる場所</th></tr>
+        <tr><td>Controller で Mapper を直接使う</td><td><code class="inline">./gradlew check</code>（ArchUnit）、CI</td></tr>
+        <tr><td>インデントを崩す・使っていない import を残す</td><td>pre-commit フック、CI</td></tr>
+        <tr><td><code class="inline">V1__init.sql</code> を書き換えてコミットする</td><td>pre-commit フック</td></tr>
+        <tr><td>AI に作らせた<b>ダミーの</b> API キーを書いてコミットする（本物は絶対に使わない）</td><td>pre-commit フック（gitleaks）、CI（<code class="inline">secret-scan</code>）</td></tr>
+        <tr><td>同じ変更を <code class="inline">--no-verify</code> でコミットし、PR を出す</td><td>CI（<code class="inline">migration-guard</code>）</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 進め方 ============ -->
+  <section id="schedule">
+    <h2>進め方 <small>チェックは このブラウザに保存されます</small></h2>
+    <div class="progress-wrap">
+      <div class="progress"><div id="bar"></div></div>
+      <div class="progress-label" id="pct">0%</div>
+      <button class="report-btn" type="button" id="openReport">進捗 PR の説明文を作る</button>
+    </div>
+
+    <div class="weeks" id="checklist">
+      <div class="week">
+        <div class="week-head"><span class="wk">Week 1</span><h3>ハーネスとガードレールを整える</h3></div>
+        <ul>
+          <li><label><input type="checkbox" data-k="w1a"><span>fork の Issues を有効にし、Actions が動くことを確かめる</span></label></li>
+          <li><label><input type="checkbox" data-k="w1b"><span>前編の判断を ADR にする（0001〜0003）</span></label></li>
+          <li><label><input type="checkbox" data-k="w1c"><span>CLAUDE.md / AGENTS.md に作業の進め方と完了の定義を追記する</span></label></li>
+          <li><label><input type="checkbox" data-k="w1d"><span>Spotless と ArchUnit を入れ、<code class="inline">./gradlew check</code> が通るようにする</span></label></li>
+          <li><label><input type="checkbox" data-k="w1e"><span>pre-commit フックと CI を入れ、わざと違反して止まることを確かめる</span></label></li>
+          <li><label><input type="checkbox" data-k="w1f"><span>gitleaks を入れ、ダミーの秘密情報で止まることを確かめる</span></label></li>
+        </ul>
+      </div>
+      <div class="week">
+        <div class="week-head"><span class="wk">Week 2</span><h3>Issue 駆動で機能を追加する</h3></div>
+        <ul>
+          <li><label><input type="checkbox" data-k="w2a"><span>前編の WANT や題材の「発展」から機能を3つ選び、受け入れ条件つきの Issue にする</span></label></li>
+          <li><label><input type="checkbox" data-k="w2b"><span>設計の判断が必要なものは、実装の前に ADR を書く（新規1本以上）</span></label></li>
+          <li><label><input type="checkbox" data-k="w2c"><span>1 Issue ＝ 1 ブランチ ＝ 1 PR で実装し、CI が通ってからマージする</span></label></li>
+          <li><label><input type="checkbox" data-k="w2d"><span>ガードレールに止められた場面・AI が間違えた場面を ai-log に記録する</span></label></li>
+        </ul>
+      </div>
+      <div class="week">
+        <div class="week-head"><span class="wk">Week 3</span><h3>振り返りと仕組みの改善</h3></div>
+        <ul>
+          <li><label><input type="checkbox" data-k="w3a"><span>2回以上出た指摘や失敗を、指示かガードレールに還元する（1つ以上）</span></label></li>
+          <li><label><input type="checkbox" data-k="w3b"><span>本家への進捗 Draft PR の説明を最新にする</span></label></li>
+          <li><label><input type="checkbox" data-k="w3c"><span>最終デモ（10分）：Issue → ADR → PR → CI のつながりを実物で見せる</span></label></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 成果物・評価 ============ -->
+  <section id="deliver">
+    <h2>成果物と評価観点</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">提出物</h3>
+        <ul class="dots">
+          <li>自分の fork（本家への進捗 Draft PR で共有）</li>
+          <li><code class="inline">docs/adr/</code> の ADR 4本以上（うち新規1本以上）</li>
+          <li>Issue 3件以上と、それぞれに対応する PR</li>
+          <li>更新した CLAUDE.md / AGENTS.md</li>
+          <li>ガードレール一式（Spotless・ArchUnit・gitleaks・pre-commit フック・CI）</li>
+          <li><b>docs/ai-log.md</b> への追記
+            <ul class="dots">
+              <li>ガードレールが違反を止めた例</li>
+              <li>失敗を指示や仕組みに還元した例</li>
+            </ul>
+          </li>
+          <li>最終デモ（10分）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">評価観点</h3>
+        <div class="table-wrap" style="margin-top:6px">
+          <table>
+            <tr><th>観点</th><th>見るポイント</th></tr>
+            <tr><td>追跡できる</td><td>Issue → PR → ADR がリンクでつながり、変更の理由をたどれる</td></tr>
+            <tr><td>判断の記録</td><td>ADR に捨てた案と理由がある</td></tr>
+            <tr><td>ハーネス</td><td>AI が自分で検証でき、完了の基準がはっきりしている</td></tr>
+            <tr><td>ガードレール</td><td>違反が機械的に止まり、実際に止まった例を示せる</td></tr>
+            <tr><td>改善</td><td>失敗を、指示か仕組みのどちらかに還元している</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="modal-backdrop" id="reportModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+    <div class="modal-head">
+      <h2 id="reportTitle">進捗 Draft PR の説明文</h2>
+      <button class="modal-close" type="button" id="closeReport" aria-label="閉じる">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-hint" style="color:var(--ink-sub)">本家への進捗 Draft PR の説明欄に貼り付けてください。</p>
+      <textarea id="reportText" spellcheck="false" aria-label="PR の説明文"></textarea>
+    </div>
+    <div class="modal-foot">
+      <span>そのまま編集できます。開き直すと作り直されます。</span>
+      <button class="modal-copy" type="button" id="copyReport">コピー</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="bar"></div>
+  前編：<a href="genai-webapp-task.html">生成AIを活用したWebアプリケーション開発</a><br>
+  不明点はいつでも気軽に相談してください。
+</footer>
+
+<script>
+(function () {
+  var KEY_CHECK = "genai-task2:checks";
+
+  function load(key, fallback) {
+    try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+    catch (e) { return fallback; }
+  }
+  function save(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+  }
+
+  function copyText(text, onDone, fallbackEl) {
+    var fallback = function () {
+      var ta = fallbackEl;
+      if (!ta) {
+        ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta);
+      }
+      ta.select();
+      try { document.execCommand("copy"); onDone(); } catch (e) {}
+      if (!fallbackEl) document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(onDone, fallback);
+    } else { fallback(); }
+  }
+
+  // チェックリスト
+  var checks = load(KEY_CHECK, {});
+  var boxes = document.querySelectorAll("#checklist input[type=checkbox]");
+  function renderProgress() {
+    var done = 0;
+    boxes.forEach(function (b) { if (b.checked) done++; });
+    var pct = Math.round(done / boxes.length * 100);
+    document.getElementById("bar").style.width = pct + "%";
+    document.getElementById("pct").textContent = pct + "%";
+  }
+  boxes.forEach(function (b) {
+    b.checked = !!checks[b.dataset.k];
+    b.addEventListener("change", function () {
+      checks[b.dataset.k] = b.checked;
+      save(KEY_CHECK, checks);
+      renderProgress();
+    });
+  });
+  renderProgress();
+
+  // コードのコピー
+  document.querySelectorAll(".copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var text = btn.closest(".code").querySelector("pre").innerText;
+      copyText(text, function () {
+        btn.textContent = "コピーしました";
+        setTimeout(function () { btn.textContent = "コピー"; }, 1500);
+      });
+    });
+  });
+
+  // 進捗 Draft PR の説明文
+  var modal = document.getElementById("reportModal");
+  var textArea = document.getElementById("reportText");
+
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
+  }
+
+  function buildText() {
+    var lines = ["## 後編の進捗（" + today() + " 時点）", ""];
+    var done = 0;
+    document.querySelectorAll("#checklist .week").forEach(function (week) {
+      lines.push("### " + week.querySelector(".wk").textContent.trim() + " " + week.querySelector("h3").textContent.trim());
+      week.querySelectorAll("input[type=checkbox]").forEach(function (b) {
+        if (b.checked) done++;
+        lines.push("- [" + (b.checked ? "x" : " ") + "] " + b.nextElementSibling.textContent.trim());
+      });
+      lines.push("");
+    });
+    lines.splice(1, 0, "", "進捗：" + Math.round(done / boxes.length * 100) + "%（" + done + " / " + boxes.length + "）");
+    lines.push("## リンク", "- Issue 一覧: （fork の Issues の URL）", "- ADR: docs/adr/", "");
+    lines.push("## 困っていること・相談したいこと", "- （あれば記入）");
+    return lines.join("\n");
+  }
+
+  var opener = null;
+  function openModal(from) {
+    opener = from || null;
+    textArea.value = buildText();
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    textArea.scrollTop = 0;
+    document.getElementById("copyReport").focus();
+  }
+  function closeModal() {
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    if (opener) opener.focus();
+  }
+
+  document.getElementById("openReport").addEventListener("click", function () { openModal(this); });
+  document.getElementById("closeReport").addEventListener("click", closeModal);
+  modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal.classList.contains("open")) closeModal();
+  });
+  document.getElementById("copyReport").addEventListener("click", function () {
+    var btn = this;
+    copyText(textArea.value, function () {
+      btn.textContent = "✓ コピーしました";
+      setTimeout(function () { btn.textContent = "コピー"; }, 1500);
+    }, textArea);
+  });
+})();
+</script>
+</body>
+</html>
