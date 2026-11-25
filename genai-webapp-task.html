@@ -341,7 +341,7 @@
 
 <header class="hero">
   <div class="hero-inner">
-    <span class="label">TRAINING TASK</span>
+    <span class="label">LEARNING TASK</span>
     <h1>生成AIを活用した<br>Webアプリケーション開発</h1>
     <p class="lead">AIコーディングツールを相棒にして、フロントエンド・バックエンド・DBまで一通り動くWebアプリを自分の手で作りきる。</p>
     <div class="meta">
@@ -706,7 +706,7 @@
       <div class="body">
         <div class="code"><div class="code-title">prompt<button class="copy" type="button">コピー</button></div><pre>社内の備品・書籍の貸出管理Webアプリを作ります。
 技術は Next.js + Spring Boot + PostgreSQL です。
-新人研修の課題なので、4週間で作れる規模に収めたいです。
+学習用の題材なので、4週間で作れる規模に収めたいです。
 
 以下は私が考えた機能一覧です。
 - 備品の登録・一覧・検索
@@ -801,7 +801,7 @@ GET /api/items を fetch すると、ブラウザのコンソールに以下の�
       <li>fork を clone し、<code class="inline">backend/</code> と <code class="inline">frontend/</code> を生成して作業を始める</li>
       <li>最初の push のあと、fork の main から本家の main へ <b>Draft PR</b> を作る。タイトルは「【進捗】題材名」。マージはされず、push するたびに進捗として本家から見える</li>
     </ol>
-    <p class="note warn"><strong>fork は Private ですが、研修の参加者には見えます。</strong>本家への進捗 Draft PR を通して、ほかの研修生や講師が中身を見られます。業務情報・顧客情報・パスワードや API キーは書かないでください。<code class="inline">.env</code> などの設定ファイルもコミットしません。</p>
+    <p class="note warn"><strong>fork は Private ですが、ほかの参加者には見えます。</strong>本家への進捗 Draft PR を通して、ほかの参加者や案内した人が中身を見られます。業務情報・顧客情報・パスワードや API キーは書かないでください。<code class="inline">.env</code> などの設定ファイルもコミットしません。</p>
 
     <h3>ディレクトリ構成（例）</h3>
     <div class="code"><div class="code-title">tree<button class="copy" type="button">コピー</button></div><pre>genai-webapp-starter/       # 自分の fork
@@ -832,7 +832,7 @@ GET /api/items を fetch すると、ブラウザのコンソールに以下の�
     <h3>CLAUDE.md / AGENTS.md（AI への指示）</h3>
     <p>AI ツールが作業のたびに読む、プロジェクトの説明書です。リポジトリ直下に置き、Claude Code なら <code class="inline">CLAUDE.md</code>、Codex / GitHub Copilot なら <code class="inline">AGENTS.md</code> という名前にします。下書きを AI に頼んでもかまいませんが、内容は自分で確認し、構成やルールが変わったら更新してください。</p>
     <div class="code"><div class="code-title">CLAUDE.md / AGENTS.md（例）<button class="copy" type="button">コピー</button></div><pre># プロジェクト概要
-社内の備品・書籍の貸出管理 Web アプリ（新人研修の課題）
+社内の備品・書籍の貸出管理 Web アプリ（学習用の題材）
 
 # 技術スタック
 - フロントエンド: Next.js（App Router）/ React / TypeScript
@@ -1117,7 +1117,7 @@ mybatis:
 
     if (kind === "topic") {
       return [
-        ":raising_hand: 研修課題の題材を決めました！",
+        ":raising_hand: Webアプリ開発タスクの題材を決めました！",
         "",
         "*題材*：" + topicLine,
         t ? "*概要*：" + t.summary : null,
@@ -1140,7 +1140,7 @@ mybatis:
     });
     var pct = Math.round(doneItems.length / boxes.length * 100);
     return [
-      ":memo: 研修課題 進捗報告（" + today() + "）",
+      ":memo: Webアプリ開発タスク 進捗報告（" + today() + "）",
       "",
       "*題材*：" + topicLine,
       "*使うAIツール*：" + tool,
